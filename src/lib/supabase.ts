@@ -10,11 +10,11 @@ declare global {
   }
 }
 
-const supabaseUrl = window.__LOVABLE_SECRETS__?.VITE_SUPABASE_URL;
+const supabaseUrl = window.__LOVABLE_SECRETS__?.VITE_SUPABASE_URL ?? 'https://wvkqszxifmvvuiqrnsqm.supabase.co';
 const supabaseAnonKey = window.__LOVABLE_SECRETS__?.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase configuration. Please ensure you have set up your Supabase secrets in the project settings.');
+if (!supabaseAnonKey) {
+  throw new Error('Missing Supabase anon key. Please ensure you have set up your VITE_SUPABASE_ANON_KEY secret in the project settings.');
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
