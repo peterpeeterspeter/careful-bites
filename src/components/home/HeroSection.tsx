@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Carousel,
@@ -31,6 +32,16 @@ const heroSlides = [
 
 export function HeroSection() {
   const [activeSlide, setActiveSlide] = useState(0);
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    navigate("/register");
+  };
+
+  const handleLearnMore = () => {
+    const currentSlide = heroSlides[activeSlide];
+    navigate(currentSlide.link);
+  };
 
   return (
     <section className="relative h-[70vh] bg-gradient-to-b from-green-50 to-white">
@@ -51,6 +62,7 @@ export function HeroSection() {
                       <Button
                         size="lg"
                         className="bg-[#4CAF50] hover:bg-[#45a049] text-lg"
+                        onClick={handleGetStarted}
                       >
                         Get Started
                       </Button>
@@ -58,6 +70,7 @@ export function HeroSection() {
                         variant="outline"
                         size="lg"
                         className="border-[#4CAF50] text-[#4CAF50] hover:bg-[#4CAF50] hover:text-white text-lg"
+                        onClick={handleLearnMore}
                       >
                         Learn More
                       </Button>
