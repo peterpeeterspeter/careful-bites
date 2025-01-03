@@ -9,6 +9,50 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          activity_date: string
+          activity_minutes: number | null
+          calories_burned: number | null
+          created_at: string
+          glucose_level: number | null
+          id: string
+          notes: string | null
+          profile_id: string
+          steps: number | null
+        }
+        Insert: {
+          activity_date: string
+          activity_minutes?: number | null
+          calories_burned?: number | null
+          created_at?: string
+          glucose_level?: number | null
+          id?: string
+          notes?: string | null
+          profile_id: string
+          steps?: number | null
+        }
+        Update: {
+          activity_date?: string
+          activity_minutes?: number | null
+          calories_burned?: number | null
+          created_at?: string
+          glucose_level?: number | null
+          id?: string
+          notes?: string | null
+          profile_id?: string
+          steps?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_logs_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dietary_preferences: {
         Row: {
           created_at: string
@@ -31,6 +75,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "dietary_preferences_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      food_intolerances: {
+        Row: {
+          created_at: string
+          id: string
+          intolerance: string
+          profile_id: string
+          severity: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          intolerance: string
+          profile_id: string
+          severity?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          intolerance?: string
+          profile_id?: string
+          severity?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_intolerances_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -117,22 +193,64 @@ export type Database = {
       }
       profiles: {
         Row: {
+          activity_level: Database["public"]["Enums"]["activity_level"] | null
+          age: number | null
           avatar_url: string | null
+          bmi: number | null
+          budget_preference: string | null
           created_at: string
+          current_weight_kg: number | null
+          daily_calorie_target: number | null
+          daily_glucose_target_range: Json | null
+          diabetes_type: Database["public"]["Enums"]["diabetes_type"] | null
+          family_size: number | null
+          gender: Database["public"]["Enums"]["gender"] | null
+          height_cm: number | null
           id: string
+          medication_schedule: Json | null
+          target_weight_kg: number | null
           username: string | null
+          weight_goal_date: string | null
         }
         Insert: {
+          activity_level?: Database["public"]["Enums"]["activity_level"] | null
+          age?: number | null
           avatar_url?: string | null
+          bmi?: number | null
+          budget_preference?: string | null
           created_at?: string
+          current_weight_kg?: number | null
+          daily_calorie_target?: number | null
+          daily_glucose_target_range?: Json | null
+          diabetes_type?: Database["public"]["Enums"]["diabetes_type"] | null
+          family_size?: number | null
+          gender?: Database["public"]["Enums"]["gender"] | null
+          height_cm?: number | null
           id: string
+          medication_schedule?: Json | null
+          target_weight_kg?: number | null
           username?: string | null
+          weight_goal_date?: string | null
         }
         Update: {
+          activity_level?: Database["public"]["Enums"]["activity_level"] | null
+          age?: number | null
           avatar_url?: string | null
+          bmi?: number | null
+          budget_preference?: string | null
           created_at?: string
+          current_weight_kg?: number | null
+          daily_calorie_target?: number | null
+          daily_glucose_target_range?: Json | null
+          diabetes_type?: Database["public"]["Enums"]["diabetes_type"] | null
+          family_size?: number | null
+          gender?: Database["public"]["Enums"]["gender"] | null
+          height_cm?: number | null
           id?: string
+          medication_schedule?: Json | null
+          target_weight_kg?: number | null
           username?: string | null
+          weight_goal_date?: string | null
         }
         Relationships: []
       }
@@ -201,6 +319,35 @@ export type Database = {
           },
         ]
       }
+      user_diet_styles: {
+        Row: {
+          created_at: string
+          diet_style: Database["public"]["Enums"]["diet_style"]
+          id: string
+          profile_id: string
+        }
+        Insert: {
+          created_at?: string
+          diet_style: Database["public"]["Enums"]["diet_style"]
+          id?: string
+          profile_id: string
+        }
+        Update: {
+          created_at?: string
+          diet_style?: Database["public"]["Enums"]["diet_style"]
+          id?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_diet_styles_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -209,6 +356,22 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      activity_level:
+        | "sedentary"
+        | "lightly_active"
+        | "moderately_active"
+        | "very_active"
+        | "extra_active"
+      diabetes_type: "type1" | "type2" | "gestational" | "prediabetes" | "none"
+      diet_style:
+        | "standard"
+        | "mediterranean"
+        | "keto"
+        | "paleo"
+        | "vegetarian"
+        | "vegan"
+        | "halal"
+        | "kosher"
       dietary_restriction:
         | "gluten_free"
         | "dairy_free"
@@ -217,6 +380,7 @@ export type Database = {
         | "low_carb"
         | "low_sugar"
         | "low_sodium"
+      gender: "male" | "female" | "other" | "prefer_not_to_say"
     }
     CompositeTypes: {
       [_ in never]: never
