@@ -9,6 +9,112 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      dietary_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          profile_id: string
+          restriction: Database["public"]["Enums"]["dietary_restriction"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          profile_id: string
+          restriction: Database["public"]["Enums"]["dietary_restriction"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          profile_id?: string
+          restriction?: Database["public"]["Enums"]["dietary_restriction"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dietary_preferences_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meal_plan_recipes: {
+        Row: {
+          created_at: string
+          id: string
+          meal_plan_id: string
+          meal_type: string
+          planned_date: string
+          recipe_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          meal_plan_id: string
+          meal_type: string
+          planned_date: string
+          recipe_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          meal_plan_id?: string
+          meal_type?: string
+          planned_date?: string
+          recipe_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_plan_recipes_meal_plan_id_fkey"
+            columns: ["meal_plan_id"]
+            isOneToOne: false
+            referencedRelation: "meal_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meal_plan_recipes_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meal_plans: {
+        Row: {
+          created_at: string
+          end_date: string
+          id: string
+          name: string
+          profile_id: string
+          start_date: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          id?: string
+          name: string
+          profile_id: string
+          start_date: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          id?: string
+          name?: string
+          profile_id?: string
+          start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_plans_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -30,6 +136,71 @@ export type Database = {
         }
         Relationships: []
       }
+      recipes: {
+        Row: {
+          calories_per_serving: number | null
+          carbs_per_serving: number | null
+          cooking_time: number | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          fat_per_serving: number | null
+          id: string
+          image_url: string | null
+          instructions: string
+          is_approved: boolean | null
+          preparation_time: number | null
+          protein_per_serving: number | null
+          servings: number | null
+          sugar_per_serving: number | null
+          title: string
+        }
+        Insert: {
+          calories_per_serving?: number | null
+          carbs_per_serving?: number | null
+          cooking_time?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          fat_per_serving?: number | null
+          id?: string
+          image_url?: string | null
+          instructions: string
+          is_approved?: boolean | null
+          preparation_time?: number | null
+          protein_per_serving?: number | null
+          servings?: number | null
+          sugar_per_serving?: number | null
+          title: string
+        }
+        Update: {
+          calories_per_serving?: number | null
+          carbs_per_serving?: number | null
+          cooking_time?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          fat_per_serving?: number | null
+          id?: string
+          image_url?: string | null
+          instructions?: string
+          is_approved?: boolean | null
+          preparation_time?: number | null
+          protein_per_serving?: number | null
+          servings?: number | null
+          sugar_per_serving?: number | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -38,7 +209,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      dietary_restriction:
+        | "gluten_free"
+        | "dairy_free"
+        | "vegetarian"
+        | "vegan"
+        | "low_carb"
+        | "low_sugar"
+        | "low_sodium"
     }
     CompositeTypes: {
       [_ in never]: never
