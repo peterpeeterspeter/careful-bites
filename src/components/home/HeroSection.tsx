@@ -12,8 +12,8 @@ import {
 const heroSlides = [
   {
     image: "/placeholder.svg",
-    title: "Smart Diabetes-Friendly Recipes",
-    description: "AI-powered recipe suggestions tailored to your glucose management goals",
+    title: "Try Our AI Recipe Generator Free",
+    description: "Generate 3 personalized diabetes-friendly recipes instantly - No registration required!",
     link: "/recipes",
   },
   {
@@ -35,7 +35,7 @@ export function HeroSection() {
   const navigate = useNavigate();
 
   const handleGetStarted = () => {
-    navigate("/register");
+    navigate("/recipe-generator");
   };
 
   const handleLearnMore = () => {
@@ -64,7 +64,7 @@ export function HeroSection() {
                         className="bg-[#4CAF50] hover:bg-[#45a049] text-lg"
                         onClick={handleGetStarted}
                       >
-                        Get Started
+                        Try Free - No Sign Up
                       </Button>
                       <Button
                         variant="outline"

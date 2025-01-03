@@ -13,17 +13,15 @@ serve(async (req) => {
   }
 
   try {
-    const { profile, dietaryPreferences, foodIntolerances } = await req.json();
+    const { preferences, isAnonymous } = await req.json();
 
-    console.log('Generating recipe for profile:', profile);
-    console.log('Dietary preferences:', dietaryPreferences);
-    console.log('Food intolerances:', foodIntolerances);
+    console.log('Generating recipe with preferences:', preferences);
+    console.log('Is anonymous user:', isAnonymous);
 
     const prompt = `Generate a diabetes-friendly recipe that meets these requirements:
-      - Diabetes Type: ${profile.diabetes_type}
-      - Dietary Restrictions: ${dietaryPreferences?.map(p => p.restriction).join(', ') || 'None'}
-      - Food Intolerances: ${foodIntolerances?.map(f => f.intolerance).join(', ') || 'None'}
-      - Daily Calorie Target: ${profile.daily_calorie_target || 'Not specified'}
+      ${isAnonymous ? '- Basic diabetes-friendly recipe' : `- Diabetes Type: ${preferences.diabetesType}`}
+      - Dietary Restrictions: ${preferences.dietaryRestrictions?.join(', ') || 'None'}
+      - Food Intolerances: ${preferences.foodIntolerances?.join(', ') || 'None'}
       
       The recipe should include:
       1. Title
@@ -83,31 +81,33 @@ serve(async (req) => {
     const data = await response.json();
     const recipe = JSON.parse(data.choices[0].message.content);
 
-    // Save the generated recipe to the database
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    // Only save to database if user is authenticated
+    if (!isAnonymous) {
+      const supabaseClient = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      );
 
-    const { error: insertError } = await supabaseClient
-      .from('recipes')
-      .insert({
-        title: recipe.title,
-        description: recipe.description,
-        instructions: recipe.instructions.join('\n'),
-        preparation_time: recipe.preparationTime,
-        cooking_time: recipe.cookingTime,
-        servings: 4,
-        calories_per_serving: recipe.nutritionalInfo.calories,
-        carbs_per_serving: recipe.nutritionalInfo.carbs,
-        protein_per_serving: recipe.nutritionalInfo.protein,
-        fat_per_serving: recipe.nutritionalInfo.fat,
-        created_by: profile.id,
-      });
+      const { error: insertError } = await supabaseClient
+        .from('recipes')
+        .insert({
+          title: recipe.title,
+          description: recipe.description,
+          instructions: recipe.instructions.join('\n'),
+          preparation_time: recipe.preparationTime,
+          cooking_time: recipe.cookingTime,
+          servings: 4,
+          calories_per_serving: recipe.nutritionalInfo.calories,
+          carbs_per_serving: recipe.nutritionalInfo.carbs,
+          protein_per_serving: recipe.nutritionalInfo.protein,
+          fat_per_serving: recipe.nutritionalInfo.fat,
+          created_by: preferences.profile_id,
+        });
 
-    if (insertError) {
-      console.error('Error saving recipe:', insertError);
-      throw new Error('Failed to save recipe');
+      if (insertError) {
+        console.error('Error saving recipe:', insertError);
+        throw new Error('Failed to save recipe');
+      }
     }
 
     return new Response(

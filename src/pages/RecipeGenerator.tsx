@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,13 +26,24 @@ export default function RecipeGenerator() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [recipe, setRecipe] = useState<GeneratedRecipe | null>(null);
+  const [generationsLeft, setGenerationsLeft] = useState(3);
+  const [preferences, setPreferences] = useState({
+    diabetesType: "type2",
+    dietaryRestrictions: [] as string[],
+    foodIntolerances: [] as string[]
+  });
+
+  useEffect(() => {
+    const storedGenerations = localStorage.getItem('freeGenerationsLeft');
+    if (storedGenerations === null) {
+      localStorage.setItem('freeGenerationsLeft', '3');
+    } else {
+      setGenerationsLeft(parseInt(storedGenerations));
+    }
+  }, []);
 
   const generateRecipe = async () => {
-    if (!user) {
-      toast.error("Please sign in to generate recipes");
-      return;
-    }
-
+    if (user) {
     setLoading(true);
     try {
       // Fetch user profile and preferences
@@ -70,13 +81,57 @@ export default function RecipeGenerator() {
     } finally {
       setLoading(false);
     }
+    } else {
+      // Handle anonymous user
+      const remainingGenerations = parseInt(localStorage.getItem('freeGenerationsLeft') || '0');
+      
+      if (remainingGenerations <= 0) {
+        toast.error("You've used all your free generations. Please sign up to continue!");
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('generate-recipe', {
+          body: {
+            preferences,
+            isAnonymous: true
+          },
+        });
+
+        if (error) throw error;
+        
+        setRecipe(data.recipe);
+        const newGenerationsLeft = remainingGenerations - 1;
+        localStorage.setItem('freeGenerationsLeft', newGenerationsLeft.toString());
+        setGenerationsLeft(newGenerationsLeft);
+        
+        if (newGenerationsLeft === 0) {
+          toast.info("That was your last free recipe! Sign up to generate more personalized recipes.");
+        } else {
+          toast.success(`Recipe generated successfully! ${newGenerationsLeft} free generations left.`);
+        }
+      } catch (error) {
+        console.error("Error generating recipe:", error);
+        toast.error("Failed to generate recipe");
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">AI Recipe Generator</h1>
-        <Button onClick={generateRecipe} disabled={loading}>
+        <div>
+          <h1 className="text-3xl font-bold">AI Recipe Generator</h1>
+          {!user && (
+            <p className="text-gray-600 mt-2">
+              Try it free! {generationsLeft} free recipes remaining
+            </p>
+          )}
+        </div>
+        <Button onClick={generateRecipe} disabled={loading || (!user && generationsLeft === 0)}>
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -87,6 +142,23 @@ export default function RecipeGenerator() {
           )}
         </Button>
       </div>
+
+      {!user && generationsLeft === 0 && (
+        <Card className="bg-green-50 border-green-200">
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold mb-2">Want More Recipes?</h3>
+            <p className="text-gray-600 mb-4">
+              Sign up now to unlock unlimited recipe generations and personalized meal planning!
+            </p>
+            <Button
+              onClick={() => window.location.href = '/register'}
+              className="bg-[#4CAF50] hover:bg-[#45a049]"
+            >
+              Sign Up - It's Free
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {recipe && (
         <Card>
