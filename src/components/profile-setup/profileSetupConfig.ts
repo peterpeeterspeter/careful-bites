@@ -9,3 +9,5 @@ export const PROFILE_SETUP_STEPS = [
   "Dietary Restrictions",
   "Food Intolerances",
 ] as const;
+
+export type ProfileSetupStep = typeof PROFILE_SETUP_STEPS[number];

@@ -6,7 +6,7 @@ import {
 
 interface ProfileSetupHeaderProps {
   currentStep: number;
-  steps: string[];
+  steps: readonly string[];
 }
 
 export function ProfileSetupHeader({ currentStep, steps }: ProfileSetupHeaderProps) {
