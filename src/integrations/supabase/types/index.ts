@@ -1,3 +1,4 @@
+export * from './profiles';
 export type Json =
   | string
   | number
@@ -511,3 +512,4 @@ export type CompositeTypes<
   : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
     ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+

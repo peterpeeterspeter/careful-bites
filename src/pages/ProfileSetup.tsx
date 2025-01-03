@@ -10,17 +10,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { MedicalProfileStep } from "@/components/profile-setup/MedicalProfileStep";
+import { DietaryPreferencesStep } from "@/components/profile-setup/DietaryPreferencesStep";
 
 const steps = [
   "Medical Profile",
@@ -35,6 +28,17 @@ export default function ProfileSetup() {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
     diabetes_type: "",
+    diagnosis_date: "",
+    last_hba1c: "",
+    preferred_glucose_unit: "mg/dL",
+    insulin_therapy: false,
+    insulin_pump_user: false,
+    cgm_user: false,
+    preferred_meal_times: {
+      breakfast: "08:00",
+      lunch: "13:00",
+      dinner: "19:00",
+    },
     age: "",
     height_cm: "",
     current_weight_kg: "",
@@ -53,11 +57,22 @@ export default function ProfileSetup() {
     }
   }, [user, navigate]);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+  const handleInputChange = (field: string, value: string | boolean) => {
+    if (field.includes(".")) {
+      const [parent, child] = field.split(".");
+      setFormData((prev) => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent as keyof typeof prev],
+          [child]: value,
+        },
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    }
   };
 
   const handleSubmit = async () => {
@@ -66,6 +81,13 @@ export default function ProfileSetup() {
         .from("profiles")
         .update({
           diabetes_type: formData.diabetes_type,
+          diagnosis_date: formData.diagnosis_date,
+          last_hba1c: parseFloat(formData.last_hba1c),
+          preferred_glucose_unit: formData.preferred_glucose_unit,
+          insulin_therapy: formData.insulin_therapy,
+          insulin_pump_user: formData.insulin_pump_user,
+          cgm_user: formData.cgm_user,
+          preferred_meal_times: formData.preferred_meal_times,
           age: parseInt(formData.age),
           height_cm: parseInt(formData.height_cm),
           current_weight_kg: parseFloat(formData.current_weight_kg),
@@ -92,69 +114,17 @@ export default function ProfileSetup() {
     switch (currentStep) {
       case 0:
         return (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="diabetes_type">Type of Diabetes</Label>
-              <Select
-                onValueChange={(value) =>
-                  handleInputChange("diabetes_type", value)
-                }
-                value={formData.diabetes_type}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="type1">Type 1</SelectItem>
-                  <SelectItem value="type2">Type 2</SelectItem>
-                  <SelectItem value="gestational">Gestational</SelectItem>
-                  <SelectItem value="prediabetes">Prediabetes</SelectItem>
-                  <SelectItem value="none">None</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="age">Age</Label>
-              <Input
-                id="age"
-                type="number"
-                value={formData.age}
-                onChange={(e) => handleInputChange("age", e.target.value)}
-              />
-            </div>
-          </div>
+          <MedicalProfileStep
+            formData={formData}
+            handleInputChange={handleInputChange}
+          />
         );
       case 1:
         return (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="budget_preference">Budget Preference</Label>
-              <Select
-                onValueChange={(value) =>
-                  handleInputChange("budget_preference", value)
-                }
-                value={formData.budget_preference}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select budget range" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="budget">Budget-friendly</SelectItem>
-                  <SelectItem value="moderate">Moderate</SelectItem>
-                  <SelectItem value="premium">Premium</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="family_size">Family Size</Label>
-              <Input
-                id="family_size"
-                type="number"
-                value={formData.family_size}
-                onChange={(e) => handleInputChange("family_size", e.target.value)}
-              />
-            </div>
-          </div>
+          <DietaryPreferencesStep
+            formData={formData}
+            handleInputChange={handleInputChange}
+          />
         );
       case 2:
         return (
