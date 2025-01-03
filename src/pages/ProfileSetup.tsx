@@ -8,6 +8,9 @@ import { ActivityLevelStep } from "@/components/profile-setup/ActivityLevelStep"
 import { WeightGoalsStep } from "@/components/profile-setup/WeightGoalsStep";
 import { MedicationStep } from "@/components/profile-setup/MedicationStep";
 import { LifestyleStep } from "@/components/profile-setup/LifestyleStep";
+import { CuisinePreferencesStep } from "@/components/profile-setup/CuisinePreferencesStep";
+import { DietaryRestrictionsStep } from "@/components/profile-setup/DietaryRestrictionsStep";
+import { FoodIntolerancesStep } from "@/components/profile-setup/FoodIntolerancesStep";
 import { ProfileSetupHeader } from "@/components/profile-setup/ProfileSetupHeader";
 import { ProfileSetupFooter } from "@/components/profile-setup/ProfileSetupFooter";
 import { useProfileSetup } from "@/hooks/useProfileSetup";
@@ -19,12 +22,16 @@ const steps = [
   "Activity Level",
   "Weight Goals",
   "Lifestyle",
+  "Cuisine Preferences",
+  "Dietary Restrictions",
+  "Food Intolerances",
 ];
 
 export default function ProfileSetup() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { currentStep, setCurrentStep, formData, handleInputChange, handleSubmit } = useProfileSetup();
+  const { currentStep, setCurrentStep, formData, handleInputChange, handleSubmit } =
+    useProfileSetup();
 
   useEffect(() => {
     if (!user) {
@@ -72,6 +79,27 @@ export default function ProfileSetup() {
       case 5:
         return (
           <LifestyleStep
+            formData={formData}
+            handleInputChange={handleInputChange}
+          />
+        );
+      case 6:
+        return (
+          <CuisinePreferencesStep
+            formData={formData}
+            handleInputChange={handleInputChange}
+          />
+        );
+      case 7:
+        return (
+          <DietaryRestrictionsStep
+            formData={formData}
+            handleInputChange={handleInputChange}
+          />
+        );
+      case 8:
+        return (
+          <FoodIntolerancesStep
             formData={formData}
             handleInputChange={handleInputChange}
           />

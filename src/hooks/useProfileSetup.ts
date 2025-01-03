@@ -38,9 +38,12 @@ export const useProfileSetup = () => {
     available_cooking_time: "",
     meal_prep_preference: "",
     grocery_frequency: "",
+    preferred_cuisines: [],
+    dietary_restrictions: [],
+    food_intolerances: [],
   });
 
-  const handleInputChange = (field: string, value: string | boolean) => {
+  const handleInputChange = (field: string, value: any) => {
     if (field.includes(".")) {
       const [parent, child] = field.split(".");
       setFormData((prev) => ({
@@ -60,7 +63,8 @@ export const useProfileSetup = () => {
 
   const handleSubmit = async () => {
     try {
-      const { error } = await supabase
+      // Update profile
+      const { error: profileError } = await supabase
         .from("profiles")
         .update({
           diabetes_type: formData.diabetes_type,
@@ -87,10 +91,40 @@ export const useProfileSetup = () => {
           available_cooking_time: formData.available_cooking_time,
           meal_prep_preference: formData.meal_prep_preference,
           grocery_frequency: formData.grocery_frequency,
+          dietary_restrictions: formData.dietary_restrictions,
         })
         .eq("id", user?.id);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
+
+      // Insert cuisine preferences
+      if (formData.preferred_cuisines.length > 0) {
+        const { error: cuisineError } = await supabase
+          .from("cuisine_preferences")
+          .upsert(
+            formData.preferred_cuisines.map((cuisine: string) => ({
+              profile_id: user?.id,
+              cuisine,
+            }))
+          );
+
+        if (cuisineError) throw cuisineError;
+      }
+
+      // Insert food intolerances
+      if (formData.food_intolerances.length > 0) {
+        const { error: intoleranceError } = await supabase
+          .from("food_intolerances")
+          .upsert(
+            formData.food_intolerances.map((intolerance: any) => ({
+              profile_id: user?.id,
+              intolerance: intolerance.food,
+              severity: intolerance.severity,
+            }))
+          );
+
+        if (intoleranceError) throw intoleranceError;
+      }
 
       toast.success("Profile setup completed!");
       navigate("/");
