@@ -1,28 +1,21 @@
-import { useAuth } from "@/contexts/AuthContext";
-import { HealthMetrics } from "@/components/HealthMetrics";
-import { RecommendedRecipes } from "@/components/RecommendedRecipes";
+import { TopUtilityBar } from "@/components/layout/TopUtilityBar";
+import { MainHeader } from "@/components/layout/MainHeader";
+import { HeroSection } from "@/components/home/HeroSection";
+import { TrendingSection } from "@/components/home/TrendingSection";
+import { VideoSection } from "@/components/home/VideoSection";
+import { PopularCollections } from "@/components/home/PopularCollections";
 
 export default function Index() {
-  const { user } = useAuth();
-  const timeOfDay = new Date().getHours() < 12 ? "morning" : new Date().getHours() < 18 ? "afternoon" : "evening";
-
   return (
-    <div className="space-y-6 p-6">
-      {/* Greeting Section */}
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">
-          Good {timeOfDay}{user ? `, ${user.email}` : ''}
-        </h1>
-        <p className="text-muted-foreground">
-          Here's your health overview and personalized recommendations.
-        </p>
-      </div>
-
-      {/* Health Metrics */}
-      <HealthMetrics />
-
-      {/* Recommended Recipes */}
-      <RecommendedRecipes />
+    <div className="min-h-screen bg-white">
+      <TopUtilityBar />
+      <MainHeader />
+      <main>
+        <HeroSection />
+        <TrendingSection />
+        <VideoSection />
+        <PopularCollections />
+      </main>
     </div>
   );
 }
