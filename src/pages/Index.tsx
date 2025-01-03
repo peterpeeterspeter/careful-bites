@@ -1,10 +1,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, Brain, Heart, TrendingUp } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Index() {
-  // This would come from auth context in the future
-  const userName = "John";
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const timeOfDay = new Date().getHours() < 12 ? "morning" : new Date().getHours() < 18 ? "afternoon" : "evening";
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
 
   const healthMetrics = [
     {
@@ -51,11 +60,13 @@ export default function Index() {
     },
   ];
 
+  if (!user) return null;
+
   return (
     <div className="space-y-6 p-6">
       {/* Greeting Section */}
       <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Good {timeOfDay}, {userName}</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Good {timeOfDay}, {user.email}</h1>
         <p className="text-muted-foreground">
           Here's your health overview and personalized recommendations.
         </p>
