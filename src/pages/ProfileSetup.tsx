@@ -14,6 +14,8 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { MedicalProfileStep } from "@/components/profile-setup/MedicalProfileStep";
 import { DietaryPreferencesStep } from "@/components/profile-setup/DietaryPreferencesStep";
+import { ActivityLevelStep } from "@/components/profile-setup/ActivityLevelStep";
+import { WeightGoalsStep } from "@/components/profile-setup/WeightGoalsStep";
 
 const steps = [
   "Medical Profile",
@@ -128,102 +130,17 @@ export default function ProfileSetup() {
         );
       case 2:
         return (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="activity_level">Activity Level</Label>
-              <Select
-                onValueChange={(value) =>
-                  handleInputChange("activity_level", value)
-                }
-                value={formData.activity_level}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select activity level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sedentary">Sedentary</SelectItem>
-                  <SelectItem value="lightly_active">Lightly Active</SelectItem>
-                  <SelectItem value="moderately_active">
-                    Moderately Active
-                  </SelectItem>
-                  <SelectItem value="very_active">Very Active</SelectItem>
-                  <SelectItem value="extra_active">Extra Active</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="daily_calorie_target">
-                Daily Calorie Target (kcal)
-              </Label>
-              <Input
-                id="daily_calorie_target"
-                type="number"
-                value={formData.daily_calorie_target}
-                onChange={(e) =>
-                  handleInputChange("daily_calorie_target", e.target.value)
-                }
-              />
-            </div>
-          </div>
+          <ActivityLevelStep
+            formData={formData}
+            handleInputChange={handleInputChange}
+          />
         );
       case 3:
         return (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="current_weight_kg">Current Weight (kg)</Label>
-              <Input
-                id="current_weight_kg"
-                type="number"
-                step="0.1"
-                value={formData.current_weight_kg}
-                onChange={(e) =>
-                  handleInputChange("current_weight_kg", e.target.value)
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="target_weight_kg">Target Weight (kg)</Label>
-              <Input
-                id="target_weight_kg"
-                type="number"
-                step="0.1"
-                value={formData.target_weight_kg}
-                onChange={(e) =>
-                  handleInputChange("target_weight_kg", e.target.value)
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="weight_goal_date">Target Date</Label>
-              <Input
-                id="weight_goal_date"
-                type="date"
-                value={formData.weight_goal_date}
-                onChange={(e) =>
-                  handleInputChange("weight_goal_date", e.target.value)
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="gender">Gender</Label>
-              <Select
-                onValueChange={(value) => handleInputChange("gender", value)}
-                value={formData.gender}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                  <SelectItem value="prefer_not_to_say">
-                    Prefer not to say
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <WeightGoalsStep
+            formData={formData}
+            handleInputChange={handleInputChange}
+          />
         );
       default:
         return null;
