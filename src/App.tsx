@@ -7,6 +7,7 @@ import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import ProfileSetup from "@/pages/ProfileSetup";
 import Profile from "@/pages/Profile";
+import MealPlanning from "@/pages/MealPlanning";
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/meal-planning" element={<MealPlanning />} />
           </Routes>
         </MainLayout>
         <Toaster />
