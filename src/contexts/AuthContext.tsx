@@ -43,9 +43,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       if (error) throw error;
       navigate('/');
-      toast.success('Succesvol ingelogd!');
+      toast.success('Successfully logged in!');
     } catch (error) {
-      toast.error('Fout bij inloggen: ' + (error as Error).message);
+      toast.error('Error logging in: ' + (error as Error).message);
       throw error;
     }
   };
@@ -57,9 +57,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         password,
       });
       if (error) throw error;
-      toast.success('Registratie succesvol! Controleer je e-mail voor verificatie.');
+      navigate('/profile-setup');
+      toast.success('Registration successful! Please check your email for verification.');
     } catch (error) {
-      toast.error('Fout bij registreren: ' + (error as Error).message);
+      toast.error('Error registering: ' + (error as Error).message);
       throw error;
     }
   };
@@ -69,9 +70,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       navigate('/login');
-      toast.success('Succesvol uitgelogd!');
+      toast.success('Successfully logged out!');
     } catch (error) {
-      toast.error('Fout bij uitloggen: ' + (error as Error).message);
+      toast.error('Error logging out: ' + (error as Error).message);
       throw error;
     }
   };
