@@ -11,11 +11,22 @@ import {
 const heroSlides = [
   {
     image: "/placeholder.svg",
-    title: "Warm up this winter with healthy comforts",
-    description: "Discover our collection of nutritious and delicious winter recipes",
-    link: "/winter-recipes",
+    title: "Manage Diabetes Deliciously",
+    description: "Discover our collection of blood sugar-friendly recipes that don't compromise on taste",
+    link: "/recipes",
   },
-  // Add more slides as needed
+  {
+    image: "/placeholder.svg",
+    title: "Smart Meal Planning Made Easy",
+    description: "Personalized meal plans to help you maintain healthy blood sugar levels",
+    link: "/meal-planning",
+  },
+  {
+    image: "/placeholder.svg",
+    title: "Join Our Supportive Community",
+    description: "Connect with others and share your diabetes management journey",
+    link: "/community",
+  }
 ];
 
 export function HeroSection() {
@@ -42,7 +53,7 @@ export function HeroSection() {
                       size="lg"
                       className="bg-[#4CAF50] hover:bg-[#45a049]"
                     >
-                      Explore Recipes
+                      Get Started
                     </Button>
                   </div>
                 </div>

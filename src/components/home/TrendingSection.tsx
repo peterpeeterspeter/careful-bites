@@ -10,18 +10,35 @@ import { Card, CardContent } from "@/components/ui/card";
 const trendingRecipes = [
   {
     id: 1,
-    title: "Healthy Banana Bread",
+    title: "Low-Carb Cauliflower Rice Bowl",
     image: "/placeholder.svg",
-    link: "/recipes/healthy-banana-bread",
+    link: "/recipes/cauliflower-rice-bowl",
   },
-  // Add more recipes
+  {
+    id: 2,
+    title: "Sugar-Free Berry Smoothie",
+    image: "/placeholder.svg",
+    link: "/recipes/berry-smoothie",
+  },
+  {
+    id: 3,
+    title: "Keto-Friendly Chicken Stir-Fry",
+    image: "/placeholder.svg",
+    link: "/recipes/chicken-stir-fry",
+  },
+  {
+    id: 4,
+    title: "Diabetic-Friendly Zucchini Pasta",
+    image: "/placeholder.svg",
+    link: "/recipes/zucchini-pasta",
+  }
 ];
 
 export function TrendingSection() {
   return (
     <section className="py-12 bg-white">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold mb-8">Trending now</h2>
+        <h2 className="text-3xl font-bold mb-8">Trending Recipes</h2>
         <Carousel
           opts={{
             align: "start",

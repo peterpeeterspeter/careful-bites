@@ -3,27 +3,27 @@ import { Button } from "@/components/ui/button";
 const collections = [
   {
     id: 1,
-    title: "Healthy Breakfast Ideas",
+    title: "Low-GI Breakfast Ideas",
     image: "/placeholder.svg",
-    link: "/collections/healthy-breakfast",
+    link: "/collections/low-gi-breakfast",
   },
   {
     id: 2,
-    title: "Quick & Easy Dinners",
+    title: "Blood Sugar-Friendly Dinners",
     image: "/placeholder.svg",
-    link: "/collections/quick-dinners",
+    link: "/collections/diabetic-dinners",
   },
   {
     id: 3,
-    title: "Vegetarian Favorites",
+    title: "Healthy Snack Options",
     image: "/placeholder.svg",
-    link: "/collections/vegetarian",
+    link: "/collections/healthy-snacks",
   },
   {
     id: 4,
-    title: "Low-Carb Recipes",
+    title: "Sugar-Free Desserts",
     image: "/placeholder.svg",
-    link: "/collections/low-carb",
+    link: "/collections/sugar-free-desserts",
   },
 ];
 
@@ -31,7 +31,7 @@ export function PopularCollections() {
   return (
     <section className="py-12 bg-white">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold mb-8">Popular recipe collections</h2>
+        <h2 className="text-3xl font-bold mb-8">Popular Recipe Collections</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {collections.map((collection) => (
             <div key={collection.id} className="relative group cursor-pointer">
@@ -58,7 +58,7 @@ export function PopularCollections() {
             size="lg"
             className="border-[#4CAF50] text-[#4CAF50] hover:bg-[#4CAF50] hover:text-white"
           >
-            More recipe collections
+            Explore All Collections
           </Button>
         </div>
       </div>
