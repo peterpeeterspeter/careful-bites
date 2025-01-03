@@ -53,6 +53,64 @@ export type Database = {
           },
         ]
       }
+      cooking_method_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          method: string
+          profile_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          method: string
+          profile_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          method?: string
+          profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooking_method_preferences_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cuisine_preferences: {
+        Row: {
+          created_at: string
+          cuisine: string
+          id: string
+          profile_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          cuisine: string
+          id?: string
+          profile_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          cuisine?: string
+          id?: string
+          profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cuisine_preferences_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dietary_preferences: {
         Row: {
           created_at: string
@@ -107,6 +165,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "food_intolerances_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ingredient_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          ingredient: string
+          preference_type: string
+          profile_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ingredient: string
+          preference_type: string
+          profile_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ingredient?: string
+          preference_type?: string
+          profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ingredient_preferences_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -196,10 +286,12 @@ export type Database = {
           activity_level: Database["public"]["Enums"]["activity_level"] | null
           age: number | null
           allergies: string[] | null
+          available_cooking_time: string | null
           avatar_url: string | null
           bmi: number | null
           budget_preference: string | null
           cgm_user: boolean | null
+          cooking_skill_level: string | null
           created_at: string
           current_weight_kg: number | null
           daily_calorie_target: number | null
@@ -207,28 +299,41 @@ export type Database = {
           diabetes_type: Database["public"]["Enums"]["diabetes_type"] | null
           diagnosis_date: string | null
           dietary_restrictions: string[] | null
+          exercise_routine: Json | null
           family_size: number | null
           gender: Database["public"]["Enums"]["gender"] | null
+          glucose_monitor_device: string | null
+          grocery_frequency: string | null
           height_cm: number | null
           id: string
           insulin_pump_user: boolean | null
+          insulin_regimen: string | null
           insulin_therapy: boolean | null
+          kitchen_equipment: Json | null
           last_hba1c: number | null
+          meal_prep_preference: string | null
+          meals_per_day: number | null
           medication_schedule: Json | null
+          medications: Json | null
           preferred_glucose_unit: string | null
           preferred_meal_times: Json | null
+          preferred_stores: Json | null
+          snacking_preferences: Json | null
           target_weight_kg: number | null
           username: string | null
           weight_goal_date: string | null
+          weight_management_goal: string | null
         }
         Insert: {
           activity_level?: Database["public"]["Enums"]["activity_level"] | null
           age?: number | null
           allergies?: string[] | null
+          available_cooking_time?: string | null
           avatar_url?: string | null
           bmi?: number | null
           budget_preference?: string | null
           cgm_user?: boolean | null
+          cooking_skill_level?: string | null
           created_at?: string
           current_weight_kg?: number | null
           daily_calorie_target?: number | null
@@ -236,28 +341,41 @@ export type Database = {
           diabetes_type?: Database["public"]["Enums"]["diabetes_type"] | null
           diagnosis_date?: string | null
           dietary_restrictions?: string[] | null
+          exercise_routine?: Json | null
           family_size?: number | null
           gender?: Database["public"]["Enums"]["gender"] | null
+          glucose_monitor_device?: string | null
+          grocery_frequency?: string | null
           height_cm?: number | null
           id: string
           insulin_pump_user?: boolean | null
+          insulin_regimen?: string | null
           insulin_therapy?: boolean | null
+          kitchen_equipment?: Json | null
           last_hba1c?: number | null
+          meal_prep_preference?: string | null
+          meals_per_day?: number | null
           medication_schedule?: Json | null
+          medications?: Json | null
           preferred_glucose_unit?: string | null
           preferred_meal_times?: Json | null
+          preferred_stores?: Json | null
+          snacking_preferences?: Json | null
           target_weight_kg?: number | null
           username?: string | null
           weight_goal_date?: string | null
+          weight_management_goal?: string | null
         }
         Update: {
           activity_level?: Database["public"]["Enums"]["activity_level"] | null
           age?: number | null
           allergies?: string[] | null
+          available_cooking_time?: string | null
           avatar_url?: string | null
           bmi?: number | null
           budget_preference?: string | null
           cgm_user?: boolean | null
+          cooking_skill_level?: string | null
           created_at?: string
           current_weight_kg?: number | null
           daily_calorie_target?: number | null
@@ -265,19 +383,30 @@ export type Database = {
           diabetes_type?: Database["public"]["Enums"]["diabetes_type"] | null
           diagnosis_date?: string | null
           dietary_restrictions?: string[] | null
+          exercise_routine?: Json | null
           family_size?: number | null
           gender?: Database["public"]["Enums"]["gender"] | null
+          glucose_monitor_device?: string | null
+          grocery_frequency?: string | null
           height_cm?: number | null
           id?: string
           insulin_pump_user?: boolean | null
+          insulin_regimen?: string | null
           insulin_therapy?: boolean | null
+          kitchen_equipment?: Json | null
           last_hba1c?: number | null
+          meal_prep_preference?: string | null
+          meals_per_day?: number | null
           medication_schedule?: Json | null
+          medications?: Json | null
           preferred_glucose_unit?: string | null
           preferred_meal_times?: Json | null
+          preferred_stores?: Json | null
+          snacking_preferences?: Json | null
           target_weight_kg?: number | null
           username?: string | null
           weight_goal_date?: string | null
+          weight_management_goal?: string | null
         }
         Relationships: []
       }
@@ -389,6 +518,8 @@ export type Database = {
         | "moderately_active"
         | "very_active"
         | "extra_active"
+      available_cooking_time: "quick" | "medium" | "extended"
+      cooking_skill_level: "beginner" | "intermediate" | "advanced"
       diabetes_type: "type1" | "type2" | "gestational" | "prediabetes" | "none"
       diet_style:
         | "standard"
@@ -408,6 +539,9 @@ export type Database = {
         | "low_sugar"
         | "low_sodium"
       gender: "male" | "female" | "other" | "prefer_not_to_say"
+      grocery_frequency: "daily" | "weekly" | "biweekly" | "monthly"
+      meal_prep_preference: "daily" | "batch" | "meal_prep"
+      weight_management_goal: "maintain" | "lose" | "gain"
     }
     CompositeTypes: {
       [_ in never]: never

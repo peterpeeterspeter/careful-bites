@@ -16,44 +16,23 @@ import { MedicalProfileStep } from "@/components/profile-setup/MedicalProfileSte
 import { DietaryPreferencesStep } from "@/components/profile-setup/DietaryPreferencesStep";
 import { ActivityLevelStep } from "@/components/profile-setup/ActivityLevelStep";
 import { WeightGoalsStep } from "@/components/profile-setup/WeightGoalsStep";
+import { MedicationStep } from "@/components/profile-setup/MedicationStep";
+import { LifestyleStep } from "@/components/profile-setup/LifestyleStep";
 
 const steps = [
   "Medical Profile",
+  "Medications",
   "Diet Preferences",
   "Activity Level",
   "Weight Goals",
+  "Lifestyle",
 ];
-
-interface FormData {
-  diabetes_type: string;
-  diagnosis_date: string;
-  last_hba1c: string;
-  preferred_glucose_unit: "mg/dL" | "mmol/L";
-  insulin_therapy: boolean;
-  insulin_pump_user: boolean;
-  cgm_user: boolean;
-  preferred_meal_times: {
-    breakfast: string;
-    lunch: string;
-    dinner: string;
-  };
-  age: string;
-  height_cm: string;
-  current_weight_kg: string;
-  target_weight_kg: string;
-  weight_goal_date: string;
-  gender: string;
-  activity_level: string;
-  daily_calorie_target: string;
-  budget_preference: string;
-  family_size: string;
-}
 
 export default function ProfileSetup() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState({
     diabetes_type: "",
     diagnosis_date: "",
     last_hba1c: "",
@@ -76,6 +55,13 @@ export default function ProfileSetup() {
     daily_calorie_target: "",
     budget_preference: "",
     family_size: "",
+    insulin_regimen: "",
+    glucose_monitor_device: "",
+    medications_reminder: false,
+    cooking_skill_level: "",
+    available_cooking_time: "",
+    meal_prep_preference: "",
+    grocery_frequency: "",
   });
 
   useEffect(() => {
@@ -90,7 +76,7 @@ export default function ProfileSetup() {
       setFormData((prev) => ({
         ...prev,
         [parent]: {
-          ...(prev[parent as keyof FormData] as object),
+          ...(prev[parent as keyof typeof prev] as object),
           [child]: value,
         },
       }));
@@ -125,6 +111,12 @@ export default function ProfileSetup() {
           daily_calorie_target: parseInt(formData.daily_calorie_target),
           budget_preference: formData.budget_preference,
           family_size: parseInt(formData.family_size),
+          insulin_regimen: formData.insulin_regimen,
+          glucose_monitor_device: formData.glucose_monitor_device,
+          cooking_skill_level: formData.cooking_skill_level,
+          available_cooking_time: formData.available_cooking_time,
+          meal_prep_preference: formData.meal_prep_preference,
+          grocery_frequency: formData.grocery_frequency,
         })
         .eq("id", user?.id);
 
@@ -148,21 +140,35 @@ export default function ProfileSetup() {
         );
       case 1:
         return (
-          <DietaryPreferencesStep
+          <MedicationStep
             formData={formData}
             handleInputChange={handleInputChange}
           />
         );
       case 2:
         return (
-          <ActivityLevelStep
+          <DietaryPreferencesStep
             formData={formData}
             handleInputChange={handleInputChange}
           />
         );
       case 3:
         return (
+          <ActivityLevelStep
+            formData={formData}
+            handleInputChange={handleInputChange}
+          />
+        );
+      case 4:
+        return (
           <WeightGoalsStep
+            formData={formData}
+            handleInputChange={handleInputChange}
+          />
+        );
+      case 5:
+        return (
+          <LifestyleStep
             formData={formData}
             handleInputChange={handleInputChange}
           />
