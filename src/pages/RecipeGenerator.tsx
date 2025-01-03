@@ -35,6 +35,7 @@ export default function RecipeGenerator() {
 
     setLoading(true);
     try {
+      // Fetch user profile and preferences
       const { data: profile } = await supabase
         .from("profiles")
         .select("*")
@@ -51,24 +52,16 @@ export default function RecipeGenerator() {
         .select("*")
         .eq("profile_id", user.id);
 
-      const response = await fetch("/api/generate-recipe", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({
+      // Call the edge function to generate recipe
+      const { data, error } = await supabase.functions.invoke('generate-recipe', {
+        body: {
           profile,
           dietaryPreferences,
           foodIntolerances,
-        }),
+        },
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to generate recipe");
-      }
-
-      const data = await response.json();
+      if (error) throw error;
       setRecipe(data.recipe);
       toast.success("Recipe generated successfully!");
     } catch (error) {

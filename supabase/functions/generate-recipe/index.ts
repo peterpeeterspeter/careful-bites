@@ -14,7 +14,10 @@ serve(async (req) => {
   try {
     const { profile, dietaryPreferences, foodIntolerances } = await req.json();
 
-    // Construct the prompt based on user preferences
+    console.log('Generating recipe for profile:', profile);
+    console.log('Dietary preferences:', dietaryPreferences);
+    console.log('Food intolerances:', foodIntolerances);
+
     const prompt = `Generate a diabetes-friendly recipe that meets these requirements:
       - Diabetes Type: ${profile.diabetes_type}
       - Dietary Restrictions: ${dietaryPreferences?.map(p => p.restriction).join(', ') || 'None'}
@@ -31,7 +34,22 @@ serve(async (req) => {
       7. Cooking time
       8. Difficulty level
       
-      Format the response as a JSON object.`;
+      Format the response as a JSON object with these exact fields:
+      {
+        "title": "string",
+        "description": "string",
+        "ingredients": ["string"],
+        "instructions": ["string"],
+        "nutritionalInfo": {
+          "calories": number,
+          "carbs": number,
+          "protein": number,
+          "fat": number
+        },
+        "preparationTime": number,
+        "cookingTime": number,
+        "difficultyLevel": "string"
+      }`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -55,8 +73,41 @@ serve(async (req) => {
       }),
     });
 
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('OpenAI API error:', error);
+      throw new Error('Failed to generate recipe');
+    }
+
     const data = await response.json();
     const recipe = JSON.parse(data.choices[0].message.content);
+
+    // Save the generated recipe to the database
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    const { error: insertError } = await supabaseClient
+      .from('recipes')
+      .insert({
+        title: recipe.title,
+        description: recipe.description,
+        instructions: recipe.instructions.join('\n'),
+        preparation_time: recipe.preparationTime,
+        cooking_time: recipe.cookingTime,
+        servings: 4,
+        calories_per_serving: recipe.nutritionalInfo.calories,
+        carbs_per_serving: recipe.nutritionalInfo.carbs,
+        protein_per_serving: recipe.nutritionalInfo.protein,
+        fat_per_serving: recipe.nutritionalInfo.fat,
+        created_by: profile.id,
+      });
+
+    if (insertError) {
+      console.error('Error saving recipe:', insertError);
+      throw new Error('Failed to save recipe');
+    }
 
     return new Response(
       JSON.stringify({ recipe }),
