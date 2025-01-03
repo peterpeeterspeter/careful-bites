@@ -14,7 +14,7 @@ const supabaseUrl = window.__LOVABLE_SECRETS__?.VITE_SUPABASE_URL ?? 'https://wv
 const supabaseAnonKey = window.__LOVABLE_SECRETS__?.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseAnonKey) {
-  console.error('Missing Supabase anon key. Please check your project settings.');
+  throw new Error('Missing Supabase anon key. Please ensure you have set up your VITE_SUPABASE_ANON_KEY secret in the project settings.');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey || '');
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
