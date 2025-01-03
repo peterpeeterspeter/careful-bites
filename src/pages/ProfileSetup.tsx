@@ -24,11 +24,36 @@ const steps = [
   "Weight Goals",
 ];
 
+interface FormData {
+  diabetes_type: string;
+  diagnosis_date: string;
+  last_hba1c: string;
+  preferred_glucose_unit: "mg/dL" | "mmol/L";
+  insulin_therapy: boolean;
+  insulin_pump_user: boolean;
+  cgm_user: boolean;
+  preferred_meal_times: {
+    breakfast: string;
+    lunch: string;
+    dinner: string;
+  };
+  age: string;
+  height_cm: string;
+  current_weight_kg: string;
+  target_weight_kg: string;
+  weight_goal_date: string;
+  gender: string;
+  activity_level: string;
+  daily_calorie_target: string;
+  budget_preference: string;
+  family_size: string;
+}
+
 export default function ProfileSetup() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     diabetes_type: "",
     diagnosis_date: "",
     last_hba1c: "",
@@ -65,7 +90,7 @@ export default function ProfileSetup() {
       setFormData((prev) => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof typeof prev],
+          ...(prev[parent as keyof FormData] as object),
           [child]: value,
         },
       }));
