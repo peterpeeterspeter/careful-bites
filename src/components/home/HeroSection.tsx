@@ -11,20 +11,20 @@ import {
 const heroSlides = [
   {
     image: "/placeholder.svg",
-    title: "Manage Diabetes Deliciously",
-    description: "Discover our collection of blood sugar-friendly recipes that don't compromise on taste",
+    title: "Smart Diabetes-Friendly Recipes",
+    description: "AI-powered recipe suggestions tailored to your glucose management goals",
     link: "/recipes",
   },
   {
     image: "/placeholder.svg",
-    title: "Smart Meal Planning Made Easy",
-    description: "Personalized meal plans to help you maintain healthy blood sugar levels",
+    title: "Personalized Meal Planning",
+    description: "Get weekly meal plans that consider your blood sugar levels, activity, and preferences",
     link: "/meal-planning",
   },
   {
     image: "/placeholder.svg",
-    title: "Join Our Supportive Community",
-    description: "Connect with others and share your diabetes management journey",
+    title: "Join Our Diabetic Community",
+    description: "Connect with others and share experiences in managing diabetes through diet",
     link: "/community",
   }
 ];
@@ -33,28 +33,35 @@ export function HeroSection() {
   const [activeSlide, setActiveSlide] = useState(0);
 
   return (
-    <section className="relative h-[60vh] bg-gray-100">
+    <section className="relative h-[70vh] bg-gradient-to-b from-green-50 to-white">
       <Carousel className="h-full">
         <CarouselContent>
           {heroSlides.map((slide, index) => (
             <CarouselItem key={index} className="h-full">
-              <div className="relative h-full">
-                <img
-                  src={slide.image}
-                  alt={slide.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute bottom-0 left-0 p-8 bg-gradient-to-t from-black/60 to-transparent w-full">
-                  <div className="container mx-auto">
-                    <h2 className="text-4xl font-bold text-white mb-4">{slide.title}</h2>
-                    <p className="text-white mb-6">{slide.description}</p>
-                    <Button
-                      variant="default"
-                      size="lg"
-                      className="bg-[#4CAF50] hover:bg-[#45a049]"
-                    >
-                      Get Started
-                    </Button>
+              <div className="relative h-full flex items-center">
+                <div className="container mx-auto px-4 md:px-6 lg:px-8">
+                  <div className="max-w-2xl">
+                    <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                      {slide.title}
+                    </h1>
+                    <p className="text-xl text-gray-600 mb-8">
+                      {slide.description}
+                    </p>
+                    <div className="flex gap-4">
+                      <Button
+                        size="lg"
+                        className="bg-[#4CAF50] hover:bg-[#45a049] text-lg"
+                      >
+                        Get Started
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="border-[#4CAF50] text-[#4CAF50] hover:bg-[#4CAF50] hover:text-white text-lg"
+                      >
+                        Learn More
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
