@@ -45,6 +45,11 @@ export function ProfileForm() {
   });
 
   async function onSubmit(values: ProfileFormValues) {
+    if (!user?.id) {
+      toast.error("User not authenticated");
+      return;
+    }
+
     try {
       const { error: profileError } = await supabase
         .from("profiles")
@@ -57,7 +62,7 @@ export function ProfileForm() {
           activity_level: values.activity_level,
           daily_calorie_target: parseInt(values.daily_calorie_target),
         })
-        .eq("id", user?.id);
+        .eq("id", user.id);
 
       if (profileError) throw profileError;
 
@@ -65,10 +70,12 @@ export function ProfileForm() {
         const { error: healthConditionError } = await supabase
           .from("user_health_conditions")
           .upsert({
-            profile_id: user?.id,
+            profile_id: user.id,
             condition: values.health_condition,
             severity: values.condition_severity,
             notes: values.condition_notes,
+          }, {
+            onConflict: 'profile_id'
           });
 
         if (healthConditionError) throw healthConditionError;
@@ -77,7 +84,7 @@ export function ProfileForm() {
         const { error: deleteError } = await supabase
           .from("user_health_conditions")
           .delete()
-          .eq("profile_id", user?.id);
+          .eq("profile_id", user.id);
 
         if (deleteError) throw deleteError;
       }
