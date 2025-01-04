@@ -33,6 +33,7 @@ const heroSlides = [
 
 export function HeroSection() {
   const [activeSlide, setActiveSlide] = useState(0);
+  const [api, setApi] = useState<CarouselApi>();
   const navigate = useNavigate();
 
   const handleGetStarted = () => {
@@ -52,10 +53,7 @@ export function HeroSection() {
           align: "start",
           loop: true
         }}
-        onSelect={(api: CarouselApi) => {
-          const selectedIndex = api.selectedScrollSnap();
-          setActiveSlide(selectedIndex);
-        }}
+        setApi={setApi}
       >
         <CarouselContent>
           {heroSlides.map((slide, index) => (
