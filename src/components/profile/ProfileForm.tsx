@@ -93,12 +93,16 @@ export function ProfileForm() {
       // Then handle health condition
       if (values.health_condition !== "none") {
         // First delete any existing conditions
-        await supabase
+        const { error: deleteError } = await supabase
           .from("user_health_conditions")
           .delete()
           .eq("profile_id", user.id);
 
-        // Then insert the new condition
+        if (deleteError && !deleteError.message.includes("No rows affected")) {
+          throw deleteError;
+        }
+
+        // Then insert the new condition with explicit profile_id
         const { error: insertError } = await supabase
           .from("user_health_conditions")
           .insert({
