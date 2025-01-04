@@ -51,9 +51,8 @@ export function ProfileForm() {
     }
 
     try {
-      console.log("Updating profile for user:", user.id);
-      
-      const { error: profileError } = await supabase
+      // Update profile first
+      const profileUpdate = await supabase
         .from("profiles")
         .update({
           age: parseInt(values.age),
@@ -66,29 +65,20 @@ export function ProfileForm() {
         })
         .eq("id", user.id);
 
-      if (profileError) throw profileError;
+      if (profileUpdate.error) throw profileUpdate.error;
 
+      // Handle health condition
       if (values.health_condition !== "none") {
-        console.log("Upserting health condition:", {
-          profile_id: user.id,
-          condition: values.health_condition,
-          severity: values.condition_severity,
-          notes: values.condition_notes,
-        });
-
-        // First, try to delete any existing condition
-        const { error: deleteError } = await supabase
+        // Delete existing condition first
+        const deleteResult = await supabase
           .from("user_health_conditions")
           .delete()
           .eq("profile_id", user.id);
 
-        if (deleteError) {
-          console.error("Error deleting existing condition:", deleteError);
-          throw deleteError;
-        }
+        if (deleteResult.error) throw deleteResult.error;
 
-        // Then insert the new condition
-        const { error: insertError } = await supabase
+        // Insert new condition
+        const insertResult = await supabase
           .from("user_health_conditions")
           .insert({
             profile_id: user.id,
@@ -97,18 +87,15 @@ export function ProfileForm() {
             notes: values.condition_notes,
           });
 
-        if (insertError) {
-          console.error("Error inserting health condition:", insertError);
-          throw insertError;
-        }
+        if (insertResult.error) throw insertResult.error;
       } else {
-        // Delete existing health condition if set to none
-        const { error: deleteError } = await supabase
+        // If health condition is none, just delete any existing condition
+        const deleteResult = await supabase
           .from("user_health_conditions")
           .delete()
           .eq("profile_id", user.id);
 
-        if (deleteError) throw deleteError;
+        if (deleteResult.error) throw deleteResult.error;
       }
 
       toast.success("Profile updated successfully!");
