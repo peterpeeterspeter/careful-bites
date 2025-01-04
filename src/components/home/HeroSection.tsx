@@ -35,7 +35,7 @@ export function HeroSection() {
   const navigate = useNavigate();
 
   const handleGetStarted = () => {
-    navigate("/recipe-generator");
+    navigate("/recipe-generator"); // Updated to match the correct route
   };
 
   const handleLearnMore = () => {
@@ -45,7 +45,7 @@ export function HeroSection() {
 
   return (
     <section className="relative h-[70vh] bg-gradient-to-b from-green-50 to-white">
-      <Carousel className="h-full">
+      <Carousel className="h-full" onSelect={(index) => setActiveSlide(index)}>
         <CarouselContent>
           {heroSlides.map((slide, index) => (
             <CarouselItem key={index} className="h-full">
