@@ -25,19 +25,36 @@ serve(async (req) => {
     }
 
     // Enhanced prompt for better recipe generation
-    const prompt = `Generate a detailed, diabetes-friendly recipe that meets these requirements:
-      ${isAnonymous ? '- Basic diabetes-friendly recipe' : `
-      - Diabetes Type: ${preferences.diabetesType}
-      - Daily Calorie Target: ${preferences.dailyCalorieTarget || 'Not specified'}
-      - Activity Level: ${preferences.activityLevel || 'Not specified'}`}
-      - Dietary Restrictions: ${preferences.dietaryRestrictions?.join(', ') || 'None'}
-      - Food Intolerances: ${preferences.foodIntolerances?.join(', ') || 'None'}
-      
-      The recipe should be:
-      1. Easy to follow
-      2. Nutritionally balanced
-      3. Blood sugar friendly
-      4. Include portion control guidance`;
+    const prompt = `Generate a detailed, diabetes-friendly recipe. Return ONLY a JSON object with NO additional text or explanation, following this EXACT structure:
+    {
+      "title": "string",
+      "description": "string",
+      "ingredients": ["string"],
+      "instructions": ["string"],
+      "nutritionalInfo": {
+        "calories": number,
+        "carbs": number,
+        "protein": number,
+        "fat": number
+      },
+      "preparationTime": number,
+      "cookingTime": number,
+      "difficultyLevel": "string"
+    }
+
+    The recipe should meet these requirements:
+    ${isAnonymous ? '- Basic diabetes-friendly recipe' : `
+    - Diabetes Type: ${preferences.diabetesType}
+    - Daily Calorie Target: ${preferences.dailyCalorieTarget || 'Not specified'}
+    - Activity Level: ${preferences.activityLevel || 'Not specified'}`}
+    - Dietary Restrictions: ${preferences.dietaryRestrictions?.join(', ') || 'None'}
+    - Food Intolerances: ${preferences.foodIntolerances?.join(', ') || 'None'}
+    
+    Make sure the recipe is:
+    1. Easy to follow
+    2. Nutritionally balanced
+    3. Blood sugar friendly
+    4. Include portion control guidance`;
 
     console.log('Sending prompt to OpenRouter:', prompt);
 
@@ -47,15 +64,15 @@ serve(async (req) => {
         headers: {
           'Authorization': `Bearer ${openRouterKey}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://github.com/lovable-chat/lovable', // Required for OpenRouter
-          'X-Title': 'Lovable Chat', // Required for OpenRouter
+          'HTTP-Referer': 'https://github.com/lovable-chat/lovable',
+          'X-Title': 'Lovable Chat',
         },
         body: JSON.stringify({
           model: 'anthropic/claude-2',
           messages: [
             {
               role: 'system',
-              content: 'You are a specialized AI chef and nutritionist that creates personalized, diabetes-friendly recipes. Always return responses in the following JSON format: { "title": "string", "description": "string", "ingredients": ["string"], "instructions": ["string"], "nutritionalInfo": { "calories": number, "carbs": number, "protein": number, "fat": number, "fiber": number, "sugar": number }, "preparationTime": number, "cookingTime": number, "difficultyLevel": "string", "servings": number, "tips": ["string"], "diabetesFriendlyNotes": "string" }'
+              content: 'You are a specialized AI chef and nutritionist that creates personalized, diabetes-friendly recipes. You must ONLY return a valid JSON object matching the specified structure, with no additional text or explanation.'
             },
             {
               role: 'user',
@@ -74,18 +91,33 @@ serve(async (req) => {
       }
 
       const data = await response.json();
-      console.log('OpenRouter response:', data);
+      console.log('OpenRouter raw response:', data);
 
       if (!data.choices?.[0]?.message?.content) {
         throw new Error('Invalid response from OpenRouter');
       }
 
+      // Clean the response content to ensure it's valid JSON
+      const cleanContent = data.choices[0].message.content.trim();
+      console.log('Cleaned content:', cleanContent);
+
       let recipe;
       try {
-        recipe = JSON.parse(data.choices[0].message.content);
+        recipe = JSON.parse(cleanContent);
+        
+        // Validate required fields
+        const requiredFields = ['title', 'description', 'ingredients', 'instructions', 'nutritionalInfo'];
+        for (const field of requiredFields) {
+          if (!recipe[field]) {
+            throw new Error(`Missing required field: ${field}`);
+          }
+        }
+        
+        console.log('Successfully parsed recipe:', recipe);
       } catch (error) {
         console.error('Error parsing OpenRouter response:', error);
-        throw new Error('Failed to parse recipe data');
+        console.error('Raw content that failed to parse:', cleanContent);
+        throw new Error('Failed to parse recipe data. Please try again.');
       }
 
       // Save recipe to database if user is authenticated
@@ -103,19 +135,17 @@ serve(async (req) => {
             instructions: recipe.instructions.join('\n'),
             preparation_time: recipe.preparationTime,
             cooking_time: recipe.cookingTime,
-            servings: recipe.servings,
+            servings: recipe.servings || 4,
             calories_per_serving: recipe.nutritionalInfo.calories,
             carbs_per_serving: recipe.nutritionalInfo.carbs,
             protein_per_serving: recipe.nutritionalInfo.protein,
             fat_per_serving: recipe.nutritionalInfo.fat,
-            sugar_per_serving: recipe.nutritionalInfo.sugar,
             created_by: preferences.profile_id,
             is_approved: true,
           });
 
         if (insertError) {
           console.error('Error saving recipe:', insertError);
-          // Don't throw here, we still want to return the recipe even if saving fails
           console.log('Failed to save recipe but continuing...');
         }
       }
