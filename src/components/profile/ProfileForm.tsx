@@ -74,6 +74,7 @@ export function ProfileForm() {
 
       // Handle health condition
       if (values.health_condition !== "none") {
+        // First, check if a health condition exists
         const { data: existingCondition } = await supabase
           .from("user_health_conditions")
           .select("id")
@@ -93,7 +94,7 @@ export function ProfileForm() {
 
           if (updateError) throw updateError;
         } else {
-          // Insert new condition
+          // Insert new condition with explicit profile_id
           const { error: insertError } = await supabase
             .from("user_health_conditions")
             .insert({
