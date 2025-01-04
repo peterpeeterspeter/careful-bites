@@ -7,6 +7,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel";
 
 const heroSlides = [
@@ -35,7 +36,7 @@ export function HeroSection() {
   const navigate = useNavigate();
 
   const handleGetStarted = () => {
-    navigate("/recipe-generator"); // Updated to match the correct route
+    navigate("/recipe-generator");
   };
 
   const handleLearnMore = () => {
@@ -51,7 +52,7 @@ export function HeroSection() {
           align: "start",
           loop: true
         }}
-        onSelect={(api) => {
+        onSelect={(api: CarouselApi) => {
           const selectedIndex = api.selectedScrollSnap();
           setActiveSlide(selectedIndex);
         }}
