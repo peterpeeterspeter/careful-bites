@@ -7,10 +7,28 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+// Helper function to transform Supabase recipe to RecipeDisplay format
+const transformRecipe = (dbRecipe: any) => {
+  return {
+    title: dbRecipe.title,
+    description: dbRecipe.description || "",
+    ingredients: [], // You might want to fetch these from a separate table
+    instructions: dbRecipe.instructions.split('\n').filter((i: string) => i.trim()), // Assuming instructions are stored as newline-separated text
+    nutritionalInfo: {
+      calories: dbRecipe.calories_per_serving,
+      carbs: dbRecipe.carbs_per_serving,
+      protein: dbRecipe.protein_per_serving,
+      fat: dbRecipe.fat_per_serving
+    },
+    preparationTime: dbRecipe.preparation_time || 0,
+    cookingTime: dbRecipe.cooking_time || 0,
+    difficultyLevel: "medium" // You might want to add this to your database schema
+  };
+};
+
 export default function MealPlanningCalendar() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
-  // Fetch meal plans for the current week
   const { data: mealPlans, isLoading } = useQuery({
     queryKey: ['mealPlans', selectedDate],
     queryFn: async () => {
@@ -67,7 +85,7 @@ export default function MealPlanningCalendar() {
                   .map((plan) => (
                     <div key={plan.id} className="border-b pb-4">
                       <h3 className="font-medium mb-2 capitalize">{plan.meal_type}</h3>
-                      {plan.recipes && <RecipeDisplay recipe={plan.recipes} />}
+                      {plan.recipes && <RecipeDisplay recipe={transformRecipe(plan.recipes)} />}
                     </div>
                   ))}
               </div>
