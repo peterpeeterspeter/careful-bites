@@ -14,26 +14,26 @@ serve(async (req) => {
 
   try {
     const { preferences, isAnonymous } = await req.json();
-
+    
     console.log('Generating recipe with preferences:', preferences);
     console.log('Is anonymous user:', isAnonymous);
 
-    const prompt = `Generate a diabetes-friendly recipe that meets these requirements:
-      ${isAnonymous ? '- Basic diabetes-friendly recipe' : `- Diabetes Type: ${preferences.diabetesType}`}
+    // Enhanced prompt for better recipe generation
+    const prompt = `Generate a detailed, diabetes-friendly recipe that meets these requirements:
+      ${isAnonymous ? '- Basic diabetes-friendly recipe' : `
+      - Diabetes Type: ${preferences.diabetesType}
+      - Daily Calorie Target: ${preferences.dailyCalorieTarget || 'Not specified'}
+      - Activity Level: ${preferences.activityLevel || 'Not specified'}`}
       - Dietary Restrictions: ${preferences.dietaryRestrictions?.join(', ') || 'None'}
       - Food Intolerances: ${preferences.foodIntolerances?.join(', ') || 'None'}
       
-      The recipe should include:
-      1. Title
-      2. Brief description
-      3. List of ingredients with measurements
-      4. Step-by-step instructions
-      5. Nutritional information (calories, carbs, protein, fat)
-      6. Preparation time
-      7. Cooking time
-      8. Difficulty level
+      The recipe should be:
+      1. Easy to follow
+      2. Nutritionally balanced
+      3. Blood sugar friendly
+      4. Include portion control guidance
       
-      Format the response as a JSON object with these exact fields:
+      Format the response as a JSON object with:
       {
         "title": "string",
         "description": "string",
@@ -43,11 +43,16 @@ serve(async (req) => {
           "calories": number,
           "carbs": number,
           "protein": number,
-          "fat": number
+          "fat": number,
+          "fiber": number,
+          "sugar": number
         },
         "preparationTime": number,
         "cookingTime": number,
-        "difficultyLevel": "string"
+        "difficultyLevel": "string",
+        "servings": number,
+        "tips": ["string"],
+        "diabetesFriendlyNotes": "string"
       }`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -61,7 +66,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a specialized AI chef that creates personalized, diabetes-friendly recipes. Always return responses in valid JSON format.'
+            content: 'You are a specialized AI chef and nutritionist that creates personalized, diabetes-friendly recipes. Always return responses in valid JSON format.'
           },
           {
             role: 'user',
@@ -81,7 +86,7 @@ serve(async (req) => {
     const data = await response.json();
     const recipe = JSON.parse(data.choices[0].message.content);
 
-    // Only save to database if user is authenticated
+    // Save recipe to database if user is authenticated
     if (!isAnonymous) {
       const supabaseClient = createClient(
         Deno.env.get('SUPABASE_URL') ?? '',
@@ -96,12 +101,14 @@ serve(async (req) => {
           instructions: recipe.instructions.join('\n'),
           preparation_time: recipe.preparationTime,
           cooking_time: recipe.cookingTime,
-          servings: 4,
+          servings: recipe.servings,
           calories_per_serving: recipe.nutritionalInfo.calories,
           carbs_per_serving: recipe.nutritionalInfo.carbs,
           protein_per_serving: recipe.nutritionalInfo.protein,
           fat_per_serving: recipe.nutritionalInfo.fat,
+          sugar_per_serving: recipe.nutritionalInfo.sugar,
           created_by: preferences.profile_id,
+          is_approved: true,
         });
 
       if (insertError) {
