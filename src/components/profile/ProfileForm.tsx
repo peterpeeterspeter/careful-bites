@@ -74,39 +74,35 @@ export function ProfileForm() {
 
       // Handle health condition
       if (values.health_condition !== "none") {
-        // Delete existing condition first
-        const { error: deleteError } = await supabase
+        // First delete any existing condition
+        await supabase
           .from("user_health_conditions")
           .delete()
           .eq("profile_id", user.id);
 
-        if (deleteError) throw deleteError;
-
-        // Insert new condition
-        const { error: insertError } = await supabase
+        // Then insert the new condition
+        const { error: healthConditionError } = await supabase
           .from("user_health_conditions")
-          .insert([{
+          .insert({
             profile_id: user.id,
             condition: values.health_condition,
             severity: values.condition_severity,
             notes: values.condition_notes,
-          }]);
+          });
 
-        if (insertError) throw insertError;
+        if (healthConditionError) throw healthConditionError;
       } else {
         // If health condition is none, just delete any existing condition
-        const { error: deleteError } = await supabase
+        await supabase
           .from("user_health_conditions")
           .delete()
           .eq("profile_id", user.id);
-
-        if (deleteError) throw deleteError;
       }
 
       toast.success("Profile updated successfully!");
     } catch (error) {
       console.error("Error updating profile:", error);
-      toast.error("Error updating profile: " + (error as Error).message);
+      toast.error("Error updating profile");
     }
   }
 
