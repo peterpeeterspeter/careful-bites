@@ -49,10 +49,12 @@ const trendingRecipes = [
 
 export function TrendingSection() {
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-secondary/5">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold">Trending Diabetes-Friendly Recipes</h2>
+          <h2 className="text-2xl font-semibold text-primary-700">
+            Trending Diabetes-Friendly Recipes
+          </h2>
         </div>
         <Carousel
           opts={{
@@ -64,7 +66,7 @@ export function TrendingSection() {
           <CarouselContent className="-ml-4">
             {trendingRecipes.map((recipe) => (
               <CarouselItem key={recipe.id} className="pl-4 md:basis-1/3 lg:basis-1/4">
-                <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+                <Card className="overflow-hidden hover:shadow-md transition-shadow border-none">
                   <CardContent className="p-0">
                     <img
                       src={recipe.image}
@@ -72,15 +74,15 @@ export function TrendingSection() {
                       className="w-full aspect-video object-cover"
                     />
                     <div className="p-4">
-                      <h3 className="font-semibold text-lg mb-2">{recipe.title}</h3>
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      <h3 className="font-medium text-lg mb-3">{recipe.title}</h3>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="secondary" className="bg-primary-50 text-primary-700 hover:bg-primary-100">
                           GI: {recipe.glycemicIndex}
                         </Badge>
-                        <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                          Carbs: {recipe.carbsPerServing}
+                        <Badge variant="secondary" className="bg-secondary-50 text-secondary-700 hover:bg-secondary-100">
+                          {recipe.carbsPerServing}
                         </Badge>
-                        <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                        <Badge variant="secondary" className="bg-muted hover:bg-muted/80">
                           {recipe.prepTime}
                         </Badge>
                       </div>

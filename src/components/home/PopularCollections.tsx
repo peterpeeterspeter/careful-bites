@@ -29,21 +29,23 @@ const collections = [
 
 export function PopularCollections() {
   return (
-    <section className="py-12 bg-white">
+    <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold mb-8">Popular Recipe Collections</h2>
+        <h2 className="text-2xl font-semibold text-primary-700 mb-8">
+          Popular Recipe Collections
+        </h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {collections.map((collection) => (
             <div key={collection.id} className="relative group cursor-pointer">
-              <div className="aspect-square overflow-hidden rounded-lg">
+              <div className="aspect-square overflow-hidden rounded-xl">
                 <img
                   src={collection.image}
                   alt={collection.title}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent">
                   <div className="absolute bottom-0 p-4">
-                    <h3 className="text-white font-semibold text-lg">
+                    <h3 className="text-white font-medium text-lg">
                       {collection.title}
                     </h3>
                   </div>
@@ -52,11 +54,11 @@ export function PopularCollections() {
             </div>
           ))}
         </div>
-        <div className="text-center mt-8">
+        <div className="text-center mt-10">
           <Button
             variant="outline"
             size="lg"
-            className="border-[#4CAF50] text-[#4CAF50] hover:bg-[#4CAF50] hover:text-white"
+            className="border-primary text-primary hover:bg-primary hover:text-white transition-colors"
           >
             Explore All Collections
           </Button>
