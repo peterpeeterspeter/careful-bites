@@ -108,12 +108,12 @@ export function ProfileForm() {
         // Then insert the new condition
         const { error: insertError } = await supabase
           .from("user_health_conditions")
-          .insert({
+          .insert([{
             profile_id: user.id,
             condition: values.health_condition,
             severity: values.condition_severity,
             notes: values.condition_notes,
-          });
+          }]);
 
         if (insertError) throw insertError;
       } else {
