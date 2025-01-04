@@ -14,7 +14,8 @@ export default function RecipeGenerator() {
   const [preferences, setPreferences] = useState({
     diabetesType: "type2",
     dietaryRestrictions: [] as string[],
-    foodIntolerances: [] as string[]
+    foodIntolerances: [] as string[],
+    dietStyles: [] as string[],
   });
 
   useEffect(() => {
@@ -24,7 +25,54 @@ export default function RecipeGenerator() {
     } else {
       setGenerationsLeft(parseInt(storedGenerations));
     }
-  }, []);
+
+    // Fetch user preferences if authenticated
+    if (user) {
+      fetchUserPreferences();
+    }
+  }, [user]);
+
+  const fetchUserPreferences = async () => {
+    try {
+      // Fetch profile data
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("diabetes_type, dietary_restrictions")
+        .eq("id", user.id)
+        .single();
+
+      // Fetch dietary preferences
+      const { data: dietaryPreferences } = await supabase
+        .from("dietary_preferences")
+        .select("restriction")
+        .eq("profile_id", user.id);
+
+      // Fetch food intolerances
+      const { data: foodIntolerances } = await supabase
+        .from("food_intolerances")
+        .select("intolerance, severity")
+        .eq("profile_id", user.id);
+
+      // Fetch diet styles
+      const { data: dietStyles } = await supabase
+        .from("user_diet_styles")
+        .select("diet_style")
+        .eq("profile_id", user.id);
+
+      setPreferences({
+        diabetesType: profile?.diabetes_type || "type2",
+        dietaryRestrictions: [
+          ...(profile?.dietary_restrictions || []),
+          ...(dietaryPreferences?.map(dp => dp.restriction) || [])
+        ],
+        foodIntolerances: foodIntolerances?.map(fi => fi.intolerance) || [],
+        dietStyles: dietStyles?.map(ds => ds.diet_style) || [],
+      });
+    } catch (error) {
+      console.error("Error fetching preferences:", error);
+      toast.error("Failed to load preferences");
+    }
+  };
 
   const generateRecipe = async () => {
     if (user) {
@@ -37,27 +85,11 @@ export default function RecipeGenerator() {
   const generateAuthenticatedRecipe = async () => {
     setLoading(true);
     try {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      const { data: dietaryPreferences } = await supabase
-        .from("dietary_preferences")
-        .select("*")
-        .eq("profile_id", user.id);
-
-      const { data: foodIntolerances } = await supabase
-        .from("food_intolerances")
-        .select("*")
-        .eq("profile_id", user.id);
-
       const { data, error } = await supabase.functions.invoke('generate-recipe', {
         body: {
-          profile,
-          dietaryPreferences,
-          foodIntolerances,
+          preferences,
+          profile_id: user.id,
+          isAnonymous: false
         },
       });
 
