@@ -41,7 +41,7 @@ export function ProfileForm() {
           .eq("profile_id", user.id)
           .maybeSingle();
 
-        if (healthError) {
+        if (healthError && !healthError.message.includes("No rows found")) {
           console.error("Error fetching health condition:", healthError);
           toast.error("Error loading health condition data");
           return {};
@@ -94,22 +94,22 @@ export function ProfileForm() {
 
       // Handle health condition
       if (values.health_condition !== "none") {
-        const { data: existingCondition, error: checkError } = await supabase
-          .from("user_health_conditions")
-          .select("id")
-          .eq("profile_id", user.id)
-          .maybeSingle();
-
-        if (checkError) {
-          throw checkError;
-        }
-
         const healthConditionData = {
           profile_id: user.id,
           condition: values.health_condition,
           severity: values.condition_severity,
           notes: values.condition_notes,
         };
+
+        const { data: existingCondition, error: checkError } = await supabase
+          .from("user_health_conditions")
+          .select("id")
+          .eq("profile_id", user.id)
+          .maybeSingle();
+
+        if (checkError && !checkError.message.includes("No rows found")) {
+          throw checkError;
+        }
 
         if (existingCondition) {
           const { error: updateError } = await supabase
