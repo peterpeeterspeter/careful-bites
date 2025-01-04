@@ -39,9 +39,9 @@ export function ProfileForm() {
           .from("user_health_conditions")
           .select("condition, severity, notes")
           .eq("profile_id", user.id)
-          .single();
+          .maybeSingle();
 
-        if (healthError && !healthError.message.includes('No rows found')) {
+        if (healthError) {
           console.error("Error fetching health condition:", healthError);
           toast.error("Error loading health condition data");
           return {};
@@ -98,9 +98,9 @@ export function ProfileForm() {
           .from("user_health_conditions")
           .select("id")
           .eq("profile_id", user.id)
-          .single();
+          .maybeSingle();
 
-        if (checkError && !checkError.message.includes('No rows found')) {
+        if (checkError) {
           throw checkError;
         }
 
@@ -130,6 +130,7 @@ export function ProfileForm() {
           }
         }
       } else {
+        // If health condition is set to none, delete any existing condition
         const { error: deleteError } = await supabase
           .from("user_health_conditions")
           .delete()
