@@ -30,7 +30,7 @@ export function ProfileForm() {
 
       const { data: healthCondition } = await supabase
         .from("user_health_conditions")
-        .select("*")
+        .select("condition, severity, notes")
         .eq("profile_id", user.id)
         .maybeSingle();
 
@@ -73,15 +73,7 @@ export function ProfileForm() {
       if (profileError) throw profileError;
 
       // Handle health condition
-      const healthConditionData = {
-        profile_id: user.id,
-        condition: values.health_condition,
-        severity: values.condition_severity,
-        notes: values.condition_notes,
-      };
-
       if (values.health_condition !== "none") {
-        // First check if a condition already exists
         const { data: existingCondition } = await supabase
           .from("user_health_conditions")
           .select("id")
@@ -104,7 +96,12 @@ export function ProfileForm() {
           // Insert new condition
           const { error: insertError } = await supabase
             .from("user_health_conditions")
-            .insert([healthConditionData]);
+            .insert([{
+              profile_id: user.id,
+              condition: values.health_condition,
+              severity: values.condition_severity,
+              notes: values.condition_notes,
+            }]);
 
           if (insertError) throw insertError;
         }
