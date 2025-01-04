@@ -101,26 +101,14 @@ export function ProfileForm() {
           notes: values.condition_notes,
         };
 
-        const { data: existingCondition, error: checkError } = await supabase
+        // First try to update existing record
+        const { error: updateError } = await supabase
           .from("user_health_conditions")
-          .select("id")
-          .eq("profile_id", user.id)
-          .maybeSingle();
+          .update(healthConditionData)
+          .eq("profile_id", user.id);
 
-        if (checkError && !checkError.message.includes("No rows found")) {
-          throw checkError;
-        }
-
-        if (existingCondition) {
-          const { error: updateError } = await supabase
-            .from("user_health_conditions")
-            .update(healthConditionData)
-            .eq("profile_id", user.id);
-
-          if (updateError) {
-            throw updateError;
-          }
-        } else {
+        // If update fails because no record exists, insert new record
+        if (updateError && updateError.message.includes("No rows affected")) {
           const { error: insertError } = await supabase
             .from("user_health_conditions")
             .insert([healthConditionData]);
@@ -128,6 +116,8 @@ export function ProfileForm() {
           if (insertError) {
             throw insertError;
           }
+        } else if (updateError) {
+          throw updateError;
         }
       } else {
         // If health condition is set to none, delete any existing condition
