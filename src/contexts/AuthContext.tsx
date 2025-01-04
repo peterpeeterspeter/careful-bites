@@ -48,6 +48,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  const validatePassword = (password: string): string | null => {
+    if (password.length < 6) {
+      return 'Password must be at least 6 characters long';
+    }
+    return null;
+  };
+
   const signIn = async (email: string, password: string) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -65,6 +72,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string) => {
     try {
+      // Validate password before attempting signup
+      const passwordError = validatePassword(password);
+      if (passwordError) {
+        toast.error(passwordError);
+        throw new Error(passwordError);
+      }
+
       const { error } = await supabase.auth.signUp({
         email,
         password,
