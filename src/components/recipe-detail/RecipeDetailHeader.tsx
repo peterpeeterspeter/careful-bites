@@ -14,11 +14,11 @@ export function RecipeDetailHeader({ recipe }: RecipeDetailHeaderProps) {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink as={Link} to="/">Home</BreadcrumbLink>
+            <Link to="/" className="text-sm font-medium">Home</Link>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink as={Link} to="/recipes">Recipes</BreadcrumbLink>
+            <Link to="/recipes" className="text-sm font-medium">Recipes</Link>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
