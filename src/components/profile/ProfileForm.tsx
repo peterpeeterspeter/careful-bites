@@ -17,16 +17,21 @@ export function ProfileForm() {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: async () => {
+      if (!user?.id) {
+        toast.error("You must be logged in to view your profile");
+        return {};
+      }
+
       const { data: profile } = await supabase
         .from("profiles")
         .select("*")
-        .eq("id", user?.id)
-        .single();
+        .eq("id", user.id)
+        .maybeSingle();
 
       const { data: healthCondition } = await supabase
         .from("user_health_conditions")
         .select("*")
-        .eq("profile_id", user?.id)
+        .eq("profile_id", user.id)
         .maybeSingle();
 
       return {
@@ -46,13 +51,13 @@ export function ProfileForm() {
 
   async function onSubmit(values: ProfileFormValues) {
     if (!user?.id) {
-      toast.error("User not authenticated");
+      toast.error("You must be logged in to update your profile");
       return;
     }
 
     try {
       // Update profile first
-      const profileUpdate = await supabase
+      const { error: profileError } = await supabase
         .from("profiles")
         .update({
           age: parseInt(values.age),
@@ -65,37 +70,37 @@ export function ProfileForm() {
         })
         .eq("id", user.id);
 
-      if (profileUpdate.error) throw profileUpdate.error;
+      if (profileError) throw profileError;
 
       // Handle health condition
       if (values.health_condition !== "none") {
         // Delete existing condition first
-        const deleteResult = await supabase
+        const { error: deleteError } = await supabase
           .from("user_health_conditions")
           .delete()
           .eq("profile_id", user.id);
 
-        if (deleteResult.error) throw deleteResult.error;
+        if (deleteError) throw deleteError;
 
         // Insert new condition
-        const insertResult = await supabase
+        const { error: insertError } = await supabase
           .from("user_health_conditions")
-          .insert({
+          .insert([{
             profile_id: user.id,
             condition: values.health_condition,
             severity: values.condition_severity,
             notes: values.condition_notes,
-          });
+          }]);
 
-        if (insertResult.error) throw insertResult.error;
+        if (insertError) throw insertError;
       } else {
         // If health condition is none, just delete any existing condition
-        const deleteResult = await supabase
+        const { error: deleteError } = await supabase
           .from("user_health_conditions")
           .delete()
           .eq("profile_id", user.id);
 
-        if (deleteResult.error) throw deleteResult.error;
+        if (deleteError) throw deleteError;
       }
 
       toast.success("Profile updated successfully!");
