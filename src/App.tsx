@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import { Toaster } from "react-hot-toast";
 import { MainLayout } from "@/components/MainLayout";
 import Index from "@/pages/Index";
@@ -11,7 +11,7 @@ import ProfileSetup from "@/pages/ProfileSetup";
 import RecipeGenerator from "@/pages/RecipeGenerator";
 import MealPlanning from "@/pages/MealPlanning";
 import MealPlanningCalendar from "@/pages/MealPlanningCalendar";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
