@@ -22,42 +22,48 @@ export function ProfileForm() {
         return {};
       }
 
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle();
+      try {
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
 
-      if (profileError) {
-        console.error("Error fetching profile:", profileError);
-        toast.error("Error loading profile data");
+        if (profileError) {
+          console.error("Error fetching profile:", profileError);
+          toast.error("Error loading profile data");
+          return {};
+        }
+
+        const { data: healthCondition, error: healthError } = await supabase
+          .from("user_health_conditions")
+          .select("condition, severity, notes")
+          .eq("profile_id", user.id)
+          .single();
+
+        if (healthError && !healthError.message.includes('No rows found')) {
+          console.error("Error fetching health condition:", healthError);
+          toast.error("Error loading health condition data");
+          return {};
+        }
+
+        return {
+          age: profile?.age?.toString() || "",
+          height_cm: profile?.height_cm?.toString() || "",
+          current_weight_kg: profile?.current_weight_kg?.toString() || "",
+          target_weight_kg: profile?.target_weight_kg?.toString() || "",
+          diabetes_type: profile?.diabetes_type || "none",
+          activity_level: profile?.activity_level || "sedentary",
+          daily_calorie_target: profile?.daily_calorie_target?.toString() || "",
+          health_condition: healthCondition?.condition || "none",
+          condition_severity: healthCondition?.severity || "",
+          condition_notes: healthCondition?.notes || "",
+        };
+      } catch (error) {
+        console.error("Error loading form data:", error);
+        toast.error("Error loading form data");
         return {};
       }
-
-      const { data: healthCondition, error: healthError } = await supabase
-        .from("user_health_conditions")
-        .select("condition, severity, notes")
-        .eq("profile_id", user.id)
-        .maybeSingle();
-
-      if (healthError) {
-        console.error("Error fetching health condition:", healthError);
-        toast.error("Error loading health condition data");
-        return {};
-      }
-
-      return {
-        age: profile?.age?.toString() || "",
-        height_cm: profile?.height_cm?.toString() || "",
-        current_weight_kg: profile?.current_weight_kg?.toString() || "",
-        target_weight_kg: profile?.target_weight_kg?.toString() || "",
-        diabetes_type: profile?.diabetes_type || "none",
-        activity_level: profile?.activity_level || "sedentary",
-        daily_calorie_target: profile?.daily_calorie_target?.toString() || "",
-        health_condition: healthCondition?.condition || "none",
-        condition_severity: healthCondition?.severity || "",
-        condition_notes: healthCondition?.notes || "",
-      };
     },
   });
 
@@ -83,64 +89,53 @@ export function ProfileForm() {
         .eq("id", user.id);
 
       if (profileError) {
-        console.error("Profile update error:", profileError);
         throw profileError;
       }
 
       // Handle health condition
       if (values.health_condition !== "none") {
-        // First, check if a health condition exists
         const { data: existingCondition, error: checkError } = await supabase
           .from("user_health_conditions")
           .select("id")
           .eq("profile_id", user.id)
-          .maybeSingle();
+          .single();
 
-        if (checkError) {
-          console.error("Error checking health condition:", checkError);
+        if (checkError && !checkError.message.includes('No rows found')) {
           throw checkError;
         }
 
+        const healthConditionData = {
+          profile_id: user.id,
+          condition: values.health_condition,
+          severity: values.condition_severity,
+          notes: values.condition_notes,
+        };
+
         if (existingCondition) {
-          // Update existing condition
           const { error: updateError } = await supabase
             .from("user_health_conditions")
-            .update({
-              condition: values.health_condition,
-              severity: values.condition_severity,
-              notes: values.condition_notes,
-            })
+            .update(healthConditionData)
             .eq("profile_id", user.id);
 
           if (updateError) {
-            console.error("Health condition update error:", updateError);
             throw updateError;
           }
         } else {
-          // Insert new condition
           const { error: insertError } = await supabase
             .from("user_health_conditions")
-            .insert({
-              profile_id: user.id,
-              condition: values.health_condition,
-              severity: values.condition_severity,
-              notes: values.condition_notes,
-            });
+            .insert([healthConditionData]);
 
           if (insertError) {
-            console.error("Health condition insert error:", insertError);
             throw insertError;
           }
         }
       } else {
-        // If health condition is none, delete any existing condition
         const { error: deleteError } = await supabase
           .from("user_health_conditions")
           .delete()
           .eq("profile_id", user.id);
 
         if (deleteError) {
-          console.error("Health condition delete error:", deleteError);
           throw deleteError;
         }
       }
