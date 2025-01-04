@@ -7,6 +7,7 @@ import { ProfileSetupFooter } from "@/components/profile-setup/ProfileSetupFoote
 import { ProfileSetupSteps } from "@/components/profile-setup/ProfileSetupSteps";
 import { PROFILE_SETUP_STEPS } from "@/components/profile-setup/profileSetupConfig";
 import { useProfileSetup } from "@/hooks/useProfileSetup";
+import { toast } from "sonner";
 
 export default function ProfileSetup() {
   const { user } = useAuth();
@@ -17,6 +18,7 @@ export default function ProfileSetup() {
     formData,
     handleInputChange,
     handleSubmit,
+    isSubmitting,
   } = useProfileSetup();
 
   useEffect(() => {
@@ -25,9 +27,15 @@ export default function ProfileSetup() {
     }
   }, [user, navigate]);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep === PROFILE_SETUP_STEPS.length - 1) {
-      handleSubmit();
+      try {
+        await handleSubmit();
+        toast.success("Profile setup completed!");
+        navigate("/");
+      } catch (error) {
+        toast.error("Error saving profile: " + (error as Error).message);
+      }
     } else {
       setCurrentStep((prev) => Math.min(PROFILE_SETUP_STEPS.length - 1, prev + 1));
     }
@@ -58,6 +66,7 @@ export default function ProfileSetup() {
           totalSteps={PROFILE_SETUP_STEPS.length}
           onPrevious={handlePrevious}
           onNext={handleNext}
+          isSubmitting={isSubmitting}
         />
       </Card>
     </div>

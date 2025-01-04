@@ -27,13 +27,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     // Listen for changes on auth state
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Check if user needs to complete profile setup
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('diabetes_type')
+          .eq('id', session.user.id)
+          .single();
+
+        if (!profile?.diabetes_type) {
+          navigate('/profile-setup');
+        }
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [navigate]);
 
   const signIn = async (email: string, password: string) => {
     try {
