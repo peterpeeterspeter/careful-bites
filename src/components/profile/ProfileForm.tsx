@@ -74,7 +74,7 @@ export function ProfileForm() {
     }
 
     try {
-      // Update profile
+      // First update profile
       const { error: profileError } = await supabase
         .from("profiles")
         .update({
@@ -88,40 +88,35 @@ export function ProfileForm() {
         })
         .eq("id", user.id);
 
-      if (profileError) {
-        console.error("Error updating profile:", profileError);
-        throw profileError;
-      }
+      if (profileError) throw profileError;
 
-      // Handle health condition
+      // Then handle health condition
       if (values.health_condition !== "none") {
-        const healthConditionData = {
-          profile_id: user.id,
-          condition: values.health_condition,
-          severity: values.condition_severity,
-          notes: values.condition_notes,
-        };
-
-        const { error: upsertError } = await supabase
+        // First delete any existing conditions
+        await supabase
           .from("user_health_conditions")
-          .upsert(healthConditionData, {
-            onConflict: 'profile_id,condition',
-            ignoreDuplicates: false
+          .delete()
+          .eq("profile_id", user.id);
+
+        // Then insert the new condition
+        const { error: insertError } = await supabase
+          .from("user_health_conditions")
+          .insert({
+            profile_id: user.id,
+            condition: values.health_condition,
+            severity: values.condition_severity,
+            notes: values.condition_notes,
           });
 
-        if (upsertError) {
-          console.error("Error upserting health condition:", upsertError);
-          throw upsertError;
-        }
+        if (insertError) throw insertError;
       } else {
-        // If health condition is set to none, delete any existing condition
+        // If health condition is none, just delete any existing conditions
         const { error: deleteError } = await supabase
           .from("user_health_conditions")
           .delete()
           .eq("profile_id", user.id);
 
         if (deleteError && !deleteError.message.includes("No rows affected")) {
-          console.error("Error deleting health condition:", deleteError);
           throw deleteError;
         }
       }
