@@ -281,6 +281,8 @@ export type Database = {
           name: string
           profile_id: string
           start_date: string
+          target_glucose_range: Json | null
+          weekly_budget: number | null
         }
         Insert: {
           created_at?: string
@@ -289,6 +291,8 @@ export type Database = {
           name: string
           profile_id: string
           start_date: string
+          target_glucose_range?: Json | null
+          weekly_budget?: number | null
         }
         Update: {
           created_at?: string
@@ -297,6 +301,8 @@ export type Database = {
           name?: string
           profile_id?: string
           start_date?: string
+          target_glucose_range?: Json | null
+          weekly_budget?: number | null
         }
         Relationships: [
           {
@@ -446,8 +452,10 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
+          estimated_cost: number | null
           fat_per_serving: number | null
           fiber_content: number | null
+          glucose_impact_level: string | null
           glycemic_index: number | null
           glycemic_load: number | null
           id: string
@@ -470,8 +478,10 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          estimated_cost?: number | null
           fat_per_serving?: number | null
           fiber_content?: number | null
+          glucose_impact_level?: string | null
           glycemic_index?: number | null
           glycemic_load?: number | null
           id?: string
@@ -494,8 +504,10 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          estimated_cost?: number | null
           fat_per_serving?: number | null
           fiber_content?: number | null
+          glucose_impact_level?: string | null
           glycemic_index?: number | null
           glycemic_load?: number | null
           id?: string
