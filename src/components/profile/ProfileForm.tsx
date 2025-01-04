@@ -101,22 +101,24 @@ export function ProfileForm() {
           notes: values.condition_notes,
         };
 
-        // First try to update existing record
+        // Try to update first
         const { error: updateError } = await supabase
           .from("user_health_conditions")
           .update(healthConditionData)
           .eq("profile_id", user.id);
 
-        // If update fails because no record exists, insert new record
+        // If no rows were affected, try to insert
         if (updateError && updateError.message.includes("No rows affected")) {
           const { error: insertError } = await supabase
             .from("user_health_conditions")
             .insert([healthConditionData]);
 
           if (insertError) {
+            console.error("Error inserting health condition:", insertError);
             throw insertError;
           }
         } else if (updateError) {
+          console.error("Error updating health condition:", updateError);
           throw updateError;
         }
       } else {
@@ -126,12 +128,14 @@ export function ProfileForm() {
           .delete()
           .eq("profile_id", user.id);
 
-        if (deleteError) {
+        if (deleteError && !deleteError.message.includes("No rows affected")) {
+          console.error("Error deleting health condition:", deleteError);
           throw deleteError;
         }
       }
 
       toast.success("Profile updated successfully!");
+      form.reset(values);
     } catch (error) {
       console.error("Error updating profile:", error);
       toast.error("Error updating profile");
