@@ -8,6 +8,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -17,6 +18,11 @@ serve(async (req) => {
     
     console.log('Generating recipe with preferences:', preferences);
     console.log('Is anonymous user:', isAnonymous);
+
+    const openAiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openAiKey) {
+      throw new Error('OpenAI API key not configured');
+    }
 
     // Enhanced prompt for better recipe generation
     const prompt = `Generate a detailed, diabetes-friendly recipe that meets these requirements:
@@ -31,34 +37,14 @@ serve(async (req) => {
       1. Easy to follow
       2. Nutritionally balanced
       3. Blood sugar friendly
-      4. Include portion control guidance
-      
-      Format the response as a JSON object with:
-      {
-        "title": "string",
-        "description": "string",
-        "ingredients": ["string"],
-        "instructions": ["string"],
-        "nutritionalInfo": {
-          "calories": number,
-          "carbs": number,
-          "protein": number,
-          "fat": number,
-          "fiber": number,
-          "sugar": number
-        },
-        "preparationTime": number,
-        "cookingTime": number,
-        "difficultyLevel": "string",
-        "servings": number,
-        "tips": ["string"],
-        "diabetesFriendlyNotes": "string"
-      }`;
+      4. Include portion control guidance`;
+
+    console.log('Sending prompt to OpenAI:', prompt);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+        'Authorization': `Bearer ${openAiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -66,7 +52,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a specialized AI chef and nutritionist that creates personalized, diabetes-friendly recipes. Always return responses in valid JSON format.'
+            content: 'You are a specialized AI chef and nutritionist that creates personalized, diabetes-friendly recipes. Always return responses in the following JSON format: { "title": "string", "description": "string", "ingredients": ["string"], "instructions": ["string"], "nutritionalInfo": { "calories": number, "carbs": number, "protein": number, "fat": number, "fiber": number, "sugar": number }, "preparationTime": number, "cookingTime": number, "difficultyLevel": "string", "servings": number, "tips": ["string"], "diabetesFriendlyNotes": "string" }'
           },
           {
             role: 'user',
@@ -74,17 +60,30 @@ serve(async (req) => {
           }
         ],
         temperature: 0.7,
+        max_tokens: 1000,
       }),
     });
 
     if (!response.ok) {
       const error = await response.json();
       console.error('OpenAI API error:', error);
-      throw new Error('Failed to generate recipe');
+      throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`);
     }
 
     const data = await response.json();
-    const recipe = JSON.parse(data.choices[0].message.content);
+    console.log('OpenAI response:', data);
+
+    if (!data.choices?.[0]?.message?.content) {
+      throw new Error('Invalid response from OpenAI');
+    }
+
+    let recipe;
+    try {
+      recipe = JSON.parse(data.choices[0].message.content);
+    } catch (error) {
+      console.error('Error parsing OpenAI response:', error);
+      throw new Error('Failed to parse recipe data');
+    }
 
     // Save recipe to database if user is authenticated
     if (!isAnonymous) {
@@ -113,7 +112,8 @@ serve(async (req) => {
 
       if (insertError) {
         console.error('Error saving recipe:', insertError);
-        throw new Error('Failed to save recipe');
+        // Don't throw here, we still want to return the recipe even if saving fails
+        console.log('Failed to save recipe but continuing...');
       }
     }
 
@@ -127,9 +127,12 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in generate-recipe function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message || 'Failed to generate recipe',
+        details: error.toString()
+      }),
       { 
         status: 500,
         headers: { 
