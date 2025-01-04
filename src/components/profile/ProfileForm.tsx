@@ -105,7 +105,7 @@ export function ProfileForm() {
         const { error: upsertError } = await supabase
           .from("user_health_conditions")
           .upsert(healthConditionData, {
-            onConflict: 'profile_id',
+            onConflict: 'profile_id,condition',
           });
 
         if (upsertError) {
