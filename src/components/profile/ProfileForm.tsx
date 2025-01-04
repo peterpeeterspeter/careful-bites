@@ -49,7 +49,6 @@ export function ProfileForm() {
           return {};
         }
 
-        // Return combined form data
         return {
           age: profile?.age?.toString() || "",
           height_cm: profile?.height_cm?.toString() || "",
@@ -93,39 +92,28 @@ export function ProfileForm() {
 
       if (profileError) throw profileError;
 
-      // Handle health condition
+      // Delete existing health condition if any
+      const { error: deleteError } = await supabase
+        .from("user_health_conditions")
+        .delete()
+        .eq("profile_id", user.id);
+
+      if (deleteError && !deleteError.message.includes("No rows found")) {
+        throw deleteError;
+      }
+
+      // Insert new health condition if not "none"
       if (values.health_condition !== "none") {
-        // First delete any existing conditions
-        const { error: deleteError } = await supabase
-          .from("user_health_conditions")
-          .delete()
-          .eq("profile_id", user.id);
-
-        if (deleteError && !deleteError.message.includes("No rows affected")) {
-          throw deleteError;
-        }
-
-        // Then insert the new condition
         const { error: insertError } = await supabase
           .from("user_health_conditions")
-          .insert([{
+          .insert({
             profile_id: user.id,
             condition: values.health_condition,
-            severity: values.condition_severity,
-            notes: values.condition_notes,
-          }]);
+            severity: values.condition_severity || null,
+            notes: values.condition_notes || null,
+          });
 
         if (insertError) throw insertError;
-      } else {
-        // If health condition is none, delete any existing conditions
-        const { error: deleteError } = await supabase
-          .from("user_health_conditions")
-          .delete()
-          .eq("profile_id", user.id);
-
-        if (deleteError && !deleteError.message.includes("No rows affected")) {
-          throw deleteError;
-        }
       }
 
       toast.success("Profile updated successfully!");
