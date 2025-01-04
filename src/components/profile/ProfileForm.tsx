@@ -73,6 +73,9 @@ export function ProfileForm() {
       return;
     }
 
+    console.log("Submitting form with values:", values);
+    console.log("Current user ID:", user.id);
+
     try {
       // First update profile
       const { error: profileError } = await supabase
@@ -88,7 +91,10 @@ export function ProfileForm() {
         })
         .eq("id", user.id);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error("Profile update error:", profileError);
+        throw profileError;
+      }
 
       // Then handle health condition
       if (values.health_condition !== "none") {
@@ -98,21 +104,32 @@ export function ProfileForm() {
           .delete()
           .eq("profile_id", user.id);
 
-        if (deleteError && !deleteError.message.includes("No rows affected")) {
-          throw deleteError;
+        if (deleteError) {
+          console.error("Delete health condition error:", deleteError);
+          if (!deleteError.message.includes("No rows affected")) {
+            throw deleteError;
+          }
         }
 
+        console.log("Inserting health condition with profile_id:", user.id);
+        
         // Then insert the new condition with explicit profile_id
-        const { error: insertError } = await supabase
+        const { data: insertData, error: insertError } = await supabase
           .from("user_health_conditions")
           .insert({
             profile_id: user.id,
             condition: values.health_condition,
             severity: values.condition_severity,
             notes: values.condition_notes,
-          });
+          })
+          .select();
 
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error("Insert health condition error:", insertError);
+          throw insertError;
+        }
+
+        console.log("Successfully inserted health condition:", insertData);
       } else {
         // If health condition is none, just delete any existing conditions
         const { error: deleteError } = await supabase
@@ -121,6 +138,7 @@ export function ProfileForm() {
           .eq("profile_id", user.id);
 
         if (deleteError && !deleteError.message.includes("No rows affected")) {
+          console.error("Delete health condition error:", deleteError);
           throw deleteError;
         }
       }
@@ -128,7 +146,7 @@ export function ProfileForm() {
       toast.success("Profile updated successfully!");
     } catch (error) {
       console.error("Error updating profile:", error);
-      toast.error("Error updating profile");
+      toast.error("Error updating profile: " + (error as Error).message);
     }
   }
 
