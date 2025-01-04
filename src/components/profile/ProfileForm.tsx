@@ -74,25 +74,40 @@ export function ProfileForm() {
 
       // Handle health condition
       if (values.health_condition !== "none") {
-        // First delete any existing condition
-        await supabase
+        // First check if a condition already exists
+        const { data: existingCondition } = await supabase
           .from("user_health_conditions")
-          .delete()
-          .eq("profile_id", user.id);
+          .select("id")
+          .eq("profile_id", user.id)
+          .maybeSingle();
 
-        // Then insert the new condition
-        const { error: healthConditionError } = await supabase
-          .from("user_health_conditions")
-          .insert({
-            profile_id: user.id,
-            condition: values.health_condition,
-            severity: values.condition_severity,
-            notes: values.condition_notes,
-          });
+        if (existingCondition) {
+          // Update existing condition
+          const { error: updateError } = await supabase
+            .from("user_health_conditions")
+            .update({
+              condition: values.health_condition,
+              severity: values.condition_severity,
+              notes: values.condition_notes,
+            })
+            .eq("profile_id", user.id);
 
-        if (healthConditionError) throw healthConditionError;
+          if (updateError) throw updateError;
+        } else {
+          // Insert new condition
+          const { error: insertError } = await supabase
+            .from("user_health_conditions")
+            .insert({
+              profile_id: user.id,
+              condition: values.health_condition,
+              severity: values.condition_severity,
+              notes: values.condition_notes,
+            });
+
+          if (insertError) throw insertError;
+        }
       } else {
-        // If health condition is none, just delete any existing condition
+        // If health condition is none, delete any existing condition
         await supabase
           .from("user_health_conditions")
           .delete()
