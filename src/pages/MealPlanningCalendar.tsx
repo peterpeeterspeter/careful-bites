@@ -5,15 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RecipeDisplay } from "@/components/recipe-generator/RecipeDisplay";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 
 // Helper function to transform Supabase recipe to RecipeDisplay format
 const transformRecipe = (dbRecipe: any) => {
   return {
     title: dbRecipe.title,
     description: dbRecipe.description || "",
-    ingredients: [], // You might want to fetch these from a separate table
-    instructions: dbRecipe.instructions.split('\n').filter((i: string) => i.trim()), // Assuming instructions are stored as newline-separated text
+    ingredients: [], // You'll need to fetch these from a separate table if needed
+    instructions: dbRecipe.instructions.split('\n').filter((i: string) => i.trim()),
     nutritionalInfo: {
       calories: dbRecipe.calories_per_serving,
       carbs: dbRecipe.carbs_per_serving,
@@ -22,7 +22,8 @@ const transformRecipe = (dbRecipe: any) => {
     },
     preparationTime: dbRecipe.preparation_time || 0,
     cookingTime: dbRecipe.cooking_time || 0,
-    difficultyLevel: "medium" // You might want to add this to your database schema
+    difficultyLevel: "medium", // You might want to add this to your database schema
+    servings: dbRecipe.servings || 4
   };
 };
 
