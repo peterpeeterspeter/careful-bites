@@ -106,6 +106,7 @@ export function ProfileForm() {
           .from("user_health_conditions")
           .upsert(healthConditionData, {
             onConflict: 'profile_id,condition',
+            ignoreDuplicates: false
           });
 
         if (upsertError) {
