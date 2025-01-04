@@ -94,7 +94,7 @@ export function ProfileForm() {
 
           if (updateError) throw updateError;
         } else {
-          // Insert new condition
+          // Insert new condition with explicit profile_id
           const { error: insertError } = await supabase
             .from("user_health_conditions")
             .insert({
