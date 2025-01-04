@@ -45,7 +45,17 @@ export function HeroSection() {
 
   return (
     <section className="relative h-[70vh] bg-gradient-to-b from-green-50 to-white">
-      <Carousel className="h-full" onSelect={(index) => setActiveSlide(index)}>
+      <Carousel 
+        className="h-full" 
+        opts={{
+          align: "start",
+          loop: true
+        }}
+        onSelect={(api) => {
+          const selectedIndex = api.selectedScrollSnap();
+          setActiveSlide(selectedIndex);
+        }}
+      >
         <CarouselContent>
           {heroSlides.map((slide, index) => (
             <CarouselItem key={index} className="h-full">
