@@ -23,7 +23,12 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
           <FormItem>
             <FormLabel>Age</FormLabel>
             <FormControl>
-              <Input type="number" {...field} />
+              <Input 
+                type="number" 
+                {...field} 
+                value={field.value || ''} 
+                onChange={(e) => field.onChange(e.target.value || '')}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -36,7 +41,12 @@ export function BasicInfoFields({ form }: BasicInfoFieldsProps) {
           <FormItem>
             <FormLabel>Height (cm)</FormLabel>
             <FormControl>
-              <Input type="number" {...field} />
+              <Input 
+                type="number" 
+                {...field} 
+                value={field.value || ''} 
+                onChange={(e) => field.onChange(e.target.value || '')}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
