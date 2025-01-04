@@ -67,14 +67,16 @@ export function ProfileForm() {
       if (profileError) throw profileError;
 
       if (values.health_condition !== "none") {
+        const healthConditionData = {
+          profile_id: user.id,
+          condition: values.health_condition,
+          severity: values.condition_severity,
+          notes: values.condition_notes,
+        };
+
         const { error: healthConditionError } = await supabase
           .from("user_health_conditions")
-          .upsert({
-            profile_id: user.id,
-            condition: values.health_condition,
-            severity: values.condition_severity,
-            notes: values.condition_notes,
-          }, {
+          .upsert(healthConditionData, {
             onConflict: 'profile_id'
           });
 
