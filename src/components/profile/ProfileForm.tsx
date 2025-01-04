@@ -92,15 +92,11 @@ export function ProfileForm() {
 
       if (profileError) throw profileError;
 
-      // Delete existing health condition if any
-      const { error: deleteError } = await supabase
+      // Delete existing health condition
+      await supabase
         .from("user_health_conditions")
         .delete()
         .eq("profile_id", user.id);
-
-      if (deleteError && !deleteError.message.includes("No rows found")) {
-        throw deleteError;
-      }
 
       // Insert new health condition if not "none"
       if (values.health_condition !== "none") {
@@ -113,7 +109,10 @@ export function ProfileForm() {
             notes: values.condition_notes || null,
           });
 
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error("Error inserting health condition:", insertError);
+          throw insertError;
+        }
       }
 
       toast.success("Profile updated successfully!");
