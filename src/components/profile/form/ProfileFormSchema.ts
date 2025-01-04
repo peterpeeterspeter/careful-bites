@@ -1,8 +1,8 @@
 import * as z from "zod";
 
-// Define the enum types to match Supabase schema
 export const diabetesTypes = ['type1', 'type2', 'gestational', 'prediabetes', 'none'] as const;
 export const activityLevels = ['sedentary', 'lightly_active', 'moderately_active', 'very_active', 'extra_active'] as const;
+export const healthConditions = ['none', 'kidney_disease', 'heart_disease', 'digestive_issues'] as const;
 
 export const profileFormSchema = z.object({
   age: z.string().min(1, "Age is required"),
@@ -12,6 +12,9 @@ export const profileFormSchema = z.object({
   diabetes_type: z.enum(diabetesTypes),
   activity_level: z.enum(activityLevels),
   daily_calorie_target: z.string().min(1, "Daily calorie target is required"),
+  health_condition: z.enum(healthConditions),
+  condition_severity: z.string().optional(),
+  condition_notes: z.string().optional(),
 });
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;

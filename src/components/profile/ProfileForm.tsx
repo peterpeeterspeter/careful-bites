@@ -9,6 +9,7 @@ import { profileFormSchema, type ProfileFormValues } from "./form/ProfileFormSch
 import { BasicInfoFields } from "./form/BasicInfoFields";
 import { WeightFields } from "./form/WeightFields";
 import { HealthFields } from "./form/HealthFields";
+import { HealthConditionsFields } from "./form/HealthConditionsFields";
 
 export function ProfileForm() {
   const { user } = useAuth();
@@ -22,6 +23,12 @@ export function ProfileForm() {
         .eq("id", user?.id)
         .single();
 
+      const { data: healthCondition } = await supabase
+        .from("user_health_conditions")
+        .select("*")
+        .eq("profile_id", user?.id)
+        .single();
+
       return {
         age: profile?.age?.toString() || "",
         height_cm: profile?.height_cm?.toString() || "",
@@ -30,13 +37,16 @@ export function ProfileForm() {
         diabetes_type: profile?.diabetes_type || "none",
         activity_level: profile?.activity_level || "sedentary",
         daily_calorie_target: profile?.daily_calorie_target?.toString() || "",
+        health_condition: healthCondition?.condition || "none",
+        condition_severity: healthCondition?.severity || "",
+        condition_notes: healthCondition?.notes || "",
       };
     },
   });
 
   async function onSubmit(values: ProfileFormValues) {
     try {
-      const { error } = await supabase
+      const { error: profileError } = await supabase
         .from("profiles")
         .update({
           age: parseInt(values.age),
@@ -49,7 +59,29 @@ export function ProfileForm() {
         })
         .eq("id", user?.id);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
+
+      if (values.health_condition !== "none") {
+        const { error: healthConditionError } = await supabase
+          .from("user_health_conditions")
+          .upsert({
+            profile_id: user?.id,
+            condition: values.health_condition,
+            severity: values.condition_severity,
+            notes: values.condition_notes,
+          });
+
+        if (healthConditionError) throw healthConditionError;
+      } else {
+        // Delete existing health condition if set to none
+        const { error: deleteError } = await supabase
+          .from("user_health_conditions")
+          .delete()
+          .eq("profile_id", user?.id);
+
+        if (deleteError) throw deleteError;
+      }
+
       toast.success("Profile updated successfully!");
     } catch (error) {
       toast.error("Error updating profile: " + (error as Error).message);
@@ -63,6 +95,7 @@ export function ProfileForm() {
           <BasicInfoFields form={form} />
           <WeightFields form={form} />
           <HealthFields form={form} />
+          <HealthConditionsFields form={form} />
         </div>
         <Button type="submit">Update Profile</Button>
       </form>

@@ -204,6 +204,33 @@ export type Database = {
           },
         ]
       }
+      ingredient_substitutions: {
+        Row: {
+          created_at: string
+          glycemic_index_difference: number | null
+          health_benefits: string[] | null
+          id: string
+          original_ingredient: string
+          substitute_ingredient: string
+        }
+        Insert: {
+          created_at?: string
+          glycemic_index_difference?: number | null
+          health_benefits?: string[] | null
+          id?: string
+          original_ingredient: string
+          substitute_ingredient: string
+        }
+        Update: {
+          created_at?: string
+          glycemic_index_difference?: number | null
+          health_benefits?: string[] | null
+          id?: string
+          original_ingredient?: string
+          substitute_ingredient?: string
+        }
+        Relationships: []
+      }
       meal_plan_recipes: {
         Row: {
           created_at: string
@@ -414,54 +441,72 @@ export type Database = {
         Row: {
           calories_per_serving: number | null
           carbs_per_serving: number | null
+          cholesterol_content: number | null
           cooking_time: number | null
           created_at: string
           created_by: string | null
           description: string | null
           fat_per_serving: number | null
+          fiber_content: number | null
+          glycemic_index: number | null
+          glycemic_load: number | null
           id: string
           image_url: string | null
           instructions: string
           is_approved: boolean | null
+          potassium_content: number | null
           preparation_time: number | null
           protein_per_serving: number | null
           servings: number | null
+          sodium_content: number | null
           sugar_per_serving: number | null
           title: string
         }
         Insert: {
           calories_per_serving?: number | null
           carbs_per_serving?: number | null
+          cholesterol_content?: number | null
           cooking_time?: number | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           fat_per_serving?: number | null
+          fiber_content?: number | null
+          glycemic_index?: number | null
+          glycemic_load?: number | null
           id?: string
           image_url?: string | null
           instructions: string
           is_approved?: boolean | null
+          potassium_content?: number | null
           preparation_time?: number | null
           protein_per_serving?: number | null
           servings?: number | null
+          sodium_content?: number | null
           sugar_per_serving?: number | null
           title: string
         }
         Update: {
           calories_per_serving?: number | null
           carbs_per_serving?: number | null
+          cholesterol_content?: number | null
           cooking_time?: number | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           fat_per_serving?: number | null
+          fiber_content?: number | null
+          glycemic_index?: number | null
+          glycemic_load?: number | null
           id?: string
           image_url?: string | null
           instructions?: string
           is_approved?: boolean | null
+          potassium_content?: number | null
           preparation_time?: number | null
           protein_per_serving?: number | null
           servings?: number | null
+          sodium_content?: number | null
           sugar_per_serving?: number | null
           title?: string
         }
@@ -497,6 +542,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "user_diet_styles_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_health_conditions: {
+        Row: {
+          condition: Database["public"]["Enums"]["health_condition"]
+          created_at: string
+          id: string
+          notes: string | null
+          profile_id: string | null
+          severity: string | null
+        }
+        Insert: {
+          condition: Database["public"]["Enums"]["health_condition"]
+          created_at?: string
+          id?: string
+          notes?: string | null
+          profile_id?: string | null
+          severity?: string | null
+        }
+        Update: {
+          condition?: Database["public"]["Enums"]["health_condition"]
+          created_at?: string
+          id?: string
+          notes?: string | null
+          profile_id?: string | null
+          severity?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_health_conditions_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -540,6 +620,11 @@ export type Database = {
         | "low_sodium"
       gender: "male" | "female" | "other" | "prefer_not_to_say"
       grocery_frequency: "daily" | "weekly" | "biweekly" | "monthly"
+      health_condition:
+        | "kidney_disease"
+        | "heart_disease"
+        | "digestive_issues"
+        | "none"
       meal_prep_preference: "daily" | "batch" | "meal_prep"
       weight_management_goal: "maintain" | "lose" | "gain"
     }
