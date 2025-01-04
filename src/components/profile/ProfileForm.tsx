@@ -23,6 +23,7 @@ export function ProfileForm() {
       }
 
       try {
+        // Fetch profile data
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("*")
@@ -35,6 +36,7 @@ export function ProfileForm() {
           return {};
         }
 
+        // Fetch health condition data
         const { data: healthCondition, error: healthError } = await supabase
           .from("user_health_conditions")
           .select("condition, severity, notes")
@@ -47,6 +49,7 @@ export function ProfileForm() {
           return {};
         }
 
+        // Return combined form data
         return {
           age: profile?.age?.toString() || "",
           height_cm: profile?.height_cm?.toString() || "",
@@ -73,9 +76,6 @@ export function ProfileForm() {
       return;
     }
 
-    console.log("Submitting form with values:", values);
-    console.log("Current user ID:", user.id);
-
     try {
       // First update profile
       const { error: profileError } = await supabase
@@ -91,12 +91,9 @@ export function ProfileForm() {
         })
         .eq("id", user.id);
 
-      if (profileError) {
-        console.error("Profile update error:", profileError);
-        throw profileError;
-      }
+      if (profileError) throw profileError;
 
-      // Then handle health condition
+      // Handle health condition
       if (values.health_condition !== "none") {
         // First delete any existing conditions
         const { error: deleteError } = await supabase
@@ -104,41 +101,29 @@ export function ProfileForm() {
           .delete()
           .eq("profile_id", user.id);
 
-        if (deleteError) {
-          console.error("Delete health condition error:", deleteError);
-          if (!deleteError.message.includes("No rows affected")) {
-            throw deleteError;
-          }
+        if (deleteError && !deleteError.message.includes("No rows affected")) {
+          throw deleteError;
         }
 
-        console.log("Inserting health condition with profile_id:", user.id);
-        
-        // Then insert the new condition with explicit profile_id
-        const { data: insertData, error: insertError } = await supabase
+        // Then insert the new condition
+        const { error: insertError } = await supabase
           .from("user_health_conditions")
           .insert({
             profile_id: user.id,
             condition: values.health_condition,
             severity: values.condition_severity,
             notes: values.condition_notes,
-          })
-          .select();
+          });
 
-        if (insertError) {
-          console.error("Insert health condition error:", insertError);
-          throw insertError;
-        }
-
-        console.log("Successfully inserted health condition:", insertData);
+        if (insertError) throw insertError;
       } else {
-        // If health condition is none, just delete any existing conditions
+        // If health condition is none, delete any existing conditions
         const { error: deleteError } = await supabase
           .from("user_health_conditions")
           .delete()
           .eq("profile_id", user.id);
 
         if (deleteError && !deleteError.message.includes("No rows affected")) {
-          console.error("Delete health condition error:", deleteError);
           throw deleteError;
         }
       }
