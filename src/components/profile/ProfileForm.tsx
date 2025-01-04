@@ -74,21 +74,22 @@ export function ProfileForm() {
     }
 
     try {
-      // Update profile first
+      // Update profile
       const { error: profileError } = await supabase
         .from("profiles")
         .update({
-          age: parseInt(values.age),
-          height_cm: parseInt(values.height_cm),
-          current_weight_kg: parseFloat(values.current_weight_kg),
-          target_weight_kg: parseFloat(values.target_weight_kg),
+          age: values.age ? parseInt(values.age) : null,
+          height_cm: values.height_cm ? parseInt(values.height_cm) : null,
+          current_weight_kg: values.current_weight_kg ? parseFloat(values.current_weight_kg) : null,
+          target_weight_kg: values.target_weight_kg ? parseFloat(values.target_weight_kg) : null,
           diabetes_type: values.diabetes_type,
           activity_level: values.activity_level,
-          daily_calorie_target: parseInt(values.daily_calorie_target),
+          daily_calorie_target: values.daily_calorie_target ? parseInt(values.daily_calorie_target) : null,
         })
         .eq("id", user.id);
 
       if (profileError) {
+        console.error("Error updating profile:", profileError);
         throw profileError;
       }
 
@@ -101,25 +102,15 @@ export function ProfileForm() {
           notes: values.condition_notes,
         };
 
-        // Try to update first
-        const { error: updateError } = await supabase
+        const { error: upsertError } = await supabase
           .from("user_health_conditions")
-          .update(healthConditionData)
-          .eq("profile_id", user.id);
+          .upsert(healthConditionData, {
+            onConflict: 'profile_id',
+          });
 
-        // If no rows were affected, try to insert
-        if (updateError && updateError.message.includes("No rows affected")) {
-          const { error: insertError } = await supabase
-            .from("user_health_conditions")
-            .insert([healthConditionData]);
-
-          if (insertError) {
-            console.error("Error inserting health condition:", insertError);
-            throw insertError;
-          }
-        } else if (updateError) {
-          console.error("Error updating health condition:", updateError);
-          throw updateError;
+        if (upsertError) {
+          console.error("Error upserting health condition:", upsertError);
+          throw upsertError;
         }
       } else {
         // If health condition is set to none, delete any existing condition
@@ -135,7 +126,6 @@ export function ProfileForm() {
       }
 
       toast.success("Profile updated successfully!");
-      form.reset(values);
     } catch (error) {
       console.error("Error updating profile:", error);
       toast.error("Error updating profile");
