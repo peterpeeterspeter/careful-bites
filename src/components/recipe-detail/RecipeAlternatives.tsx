@@ -29,7 +29,7 @@ export function RecipeAlternatives({ currentRecipeId }: RecipeAlternativesProps)
     <div className="lg:col-span-1">
       <Card>
         <CardHeader>
-          <CardTitle>Similar Recipes</CardTitle>
+          <CardTitle className="text-xl">Similar Recipes</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -43,15 +43,16 @@ export function RecipeAlternatives({ currentRecipeId }: RecipeAlternativesProps)
                   <img
                     src={recipe.image_url || "/placeholder.svg"}
                     alt={recipe.title}
-                    className="w-20 h-20 object-cover rounded"
+                    className="w-20 h-20 object-cover rounded-lg shadow-sm"
                   />
                   <div>
-                    <h3 className="font-medium group-hover:text-primary">
+                    <h3 className="font-medium group-hover:text-primary line-clamp-2">
                       {recipe.title}
                     </h3>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                       <span>4.5</span>
+                      <span className="text-gray-400">(12 reviews)</span>
                     </div>
                   </div>
                 </div>
