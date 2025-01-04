@@ -1,9 +1,9 @@
 import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/lib/supabase";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { authTheme } from "@/config/authTheme";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -25,36 +25,8 @@ export default function Login() {
         <div className="bg-card p-6 rounded-lg shadow-sm">
           <Auth
             supabaseClient={supabase}
-            appearance={{
-              theme: ThemeSupa,
-              variables: {
-                default: {
-                  colors: {
-                    brand: '#4CAF50',
-                    brandAccent: '#43A047',
-                  },
-                },
-              },
-            }}
+            appearance={authTheme}
             providers={[]}
-            localization={{
-              variables: {
-                sign_in: {
-                  email_label: 'E-mailadres',
-                  password_label: 'Wachtwoord',
-                  button_label: 'Inloggen',
-                  loading_button_label: 'Inloggen...',
-                  link_text: 'Heb je al een account? Log in',
-                },
-                sign_up: {
-                  email_label: 'E-mailadres',
-                  password_label: 'Wachtwoord',
-                  button_label: 'Registreren',
-                  loading_button_label: 'Registreren...',
-                  link_text: 'Nog geen account? Registreer je',
-                },
-              },
-            }}
           />
         </div>
       </div>
