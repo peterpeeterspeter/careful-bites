@@ -1,13 +1,53 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { Database } from "@/integrations/supabase/types";
+
+type DiabetesType = Database["public"]["Enums"]["diabetes_type"];
+type Gender = Database["public"]["Enums"]["gender"];
+type ActivityLevel = Database["public"]["Enums"]["activity_level"];
+
+interface FormData {
+  diabetes_type: DiabetesType;
+  diagnosis_date: string;
+  last_hba1c: string;
+  preferred_glucose_unit: string;
+  insulin_therapy: boolean;
+  insulin_pump_user: boolean;
+  cgm_user: boolean;
+  preferred_meal_times: {
+    breakfast: string;
+    lunch: string;
+    dinner: string;
+  };
+  age: string;
+  height_cm: string;
+  current_weight_kg: string;
+  target_weight_kg: string;
+  weight_goal_date: string;
+  gender: Gender;
+  activity_level: ActivityLevel;
+  daily_calorie_target: string;
+  budget_preference: string;
+  family_size: string;
+  insulin_regimen: string;
+  glucose_monitor_device: string;
+  medications_reminder: boolean;
+  cooking_skill_level: string;
+  available_cooking_time: string;
+  meal_prep_preference: string;
+  grocery_frequency: string;
+  preferred_cuisines: string[];
+  dietary_restrictions: string[];
+  food_intolerances: { food: string; severity: string }[];
+}
 
 export const useProfileSetup = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
-  const [formData, setFormData] = useState({
-    diabetes_type: "",
+  const [formData, setFormData] = useState<FormData>({
+    diabetes_type: "none",
     diagnosis_date: "",
     last_hba1c: "",
     preferred_glucose_unit: "mg/dL",
@@ -24,8 +64,8 @@ export const useProfileSetup = () => {
     current_weight_kg: "",
     target_weight_kg: "",
     weight_goal_date: "",
-    gender: "",
-    activity_level: "",
+    gender: "prefer_not_to_say",
+    activity_level: "sedentary",
     daily_calorie_target: "",
     budget_preference: "",
     family_size: "",
@@ -68,7 +108,7 @@ export const useProfileSetup = () => {
       const { error: profileError } = await supabase
         .from("profiles")
         .update({
-          diabetes_type: formData.diabetes_type,
+          diabetes_type: formData.diabetes_type as DiabetesType,
           diagnosis_date: formData.diagnosis_date,
           last_hba1c: parseFloat(formData.last_hba1c),
           preferred_glucose_unit: formData.preferred_glucose_unit,
@@ -81,8 +121,8 @@ export const useProfileSetup = () => {
           current_weight_kg: parseFloat(formData.current_weight_kg),
           target_weight_kg: parseFloat(formData.target_weight_kg),
           weight_goal_date: formData.weight_goal_date,
-          gender: formData.gender,
-          activity_level: formData.activity_level,
+          gender: formData.gender as Gender,
+          activity_level: formData.activity_level as ActivityLevel,
           daily_calorie_target: parseInt(formData.daily_calorie_target),
           budget_preference: formData.budget_preference,
           family_size: parseInt(formData.family_size),
@@ -117,7 +157,7 @@ export const useProfileSetup = () => {
         const { error: intoleranceError } = await supabase
           .from("food_intolerances")
           .upsert(
-            formData.food_intolerances.map((intolerance: any) => ({
+            formData.food_intolerances.map((intolerance) => ({
               profile_id: user.id,
               intolerance: intolerance.food,
               severity: intolerance.severity,
