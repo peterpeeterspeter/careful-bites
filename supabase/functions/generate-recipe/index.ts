@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { preferences, isAnonymous } = await req.json();
+    const { preferences, isAnonymous, profile_id } = await req.json();
     
     console.log('Generating recipe with preferences:', preferences);
     console.log('Is anonymous user:', isAnonymous);
@@ -24,8 +24,23 @@ serve(async (req) => {
       throw new Error('OpenRouter API key not configured');
     }
 
+    // Build dietary restrictions string
+    const dietaryRestrictionsStr = preferences.dietaryRestrictions?.length > 0 
+      ? `Dietary Restrictions: ${preferences.dietaryRestrictions.join(', ')}`
+      : 'No specific dietary restrictions';
+
+    // Build food intolerances string
+    const foodIntolerancesStr = preferences.foodIntolerances?.length > 0
+      ? `Food Intolerances: ${preferences.foodIntolerances.join(', ')}`
+      : 'No specific food intolerances';
+
+    // Build diet styles string
+    const dietStylesStr = preferences.dietStyles?.length > 0
+      ? `Diet Styles: ${preferences.dietStyles.join(', ')}`
+      : 'No specific diet styles';
+
     // Enhanced prompt for better recipe generation
-    const prompt = `Generate a detailed, diabetes-friendly recipe. Return ONLY a JSON object with NO additional text or explanation, following this EXACT structure:
+    const prompt = `Generate a detailed recipe that meets these specific dietary requirements. Return ONLY a JSON object with NO additional text or explanation, following this EXACT structure:
     {
       "title": "string",
       "description": "string",
@@ -35,26 +50,28 @@ serve(async (req) => {
         "calories": number,
         "carbs": number,
         "protein": number,
-        "fat": number
+        "fat": number,
+        "sugar": number
       },
       "preparationTime": number,
       "cookingTime": number,
-      "difficultyLevel": "string"
+      "difficultyLevel": "Easy" | "Medium" | "Hard",
+      "servings": number
     }
 
-    The recipe should meet these requirements:
-    ${isAnonymous ? '- Basic diabetes-friendly recipe' : `
-    - Diabetes Type: ${preferences.diabetesType}
-    - Daily Calorie Target: ${preferences.dailyCalorieTarget || 'Not specified'}
-    - Activity Level: ${preferences.activityLevel || 'Not specified'}`}
-    - Dietary Restrictions: ${preferences.dietaryRestrictions?.join(', ') || 'None'}
-    - Food Intolerances: ${preferences.foodIntolerances?.join(', ') || 'None'}
+    The recipe MUST strictly adhere to these requirements:
+    - Diabetes Type: ${preferences.diabetesType || 'Type 2'}
+    - ${dietaryRestrictionsStr}
+    - ${foodIntolerancesStr}
+    - ${dietStylesStr}
     
-    Make sure the recipe is:
-    1. Easy to follow
-    2. Nutritionally balanced
-    3. Blood sugar friendly
-    4. Include portion control guidance`;
+    Recipe requirements:
+    1. Must be diabetes-friendly with controlled carbohydrates
+    2. Include exact measurements for all ingredients
+    3. Clear, step-by-step instructions
+    4. Complete nutritional information
+    5. Realistic preparation and cooking times
+    6. Appropriate portion sizes for blood sugar management`;
 
     console.log('Sending prompt to OpenRouter:', prompt);
 
@@ -106,10 +123,29 @@ serve(async (req) => {
         recipe = JSON.parse(cleanContent);
         
         // Validate required fields
-        const requiredFields = ['title', 'description', 'ingredients', 'instructions', 'nutritionalInfo'];
+        const requiredFields = [
+          'title', 
+          'description', 
+          'ingredients', 
+          'instructions', 
+          'nutritionalInfo',
+          'preparationTime',
+          'cookingTime',
+          'difficultyLevel',
+          'servings'
+        ];
+        
         for (const field of requiredFields) {
           if (!recipe[field]) {
             throw new Error(`Missing required field: ${field}`);
+          }
+        }
+
+        // Validate nutritional info fields
+        const requiredNutritionalFields = ['calories', 'carbs', 'protein', 'fat', 'sugar'];
+        for (const field of requiredNutritionalFields) {
+          if (typeof recipe.nutritionalInfo[field] !== 'number') {
+            throw new Error(`Invalid or missing nutritional info field: ${field}`);
           }
         }
         
@@ -121,7 +157,7 @@ serve(async (req) => {
       }
 
       // Save recipe to database if user is authenticated
-      if (!isAnonymous) {
+      if (!isAnonymous && profile_id) {
         const supabaseClient = createClient(
           Deno.env.get('SUPABASE_URL') ?? '',
           Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -135,12 +171,13 @@ serve(async (req) => {
             instructions: recipe.instructions.join('\n'),
             preparation_time: recipe.preparationTime,
             cooking_time: recipe.cookingTime,
-            servings: recipe.servings || 4,
+            servings: recipe.servings,
             calories_per_serving: recipe.nutritionalInfo.calories,
             carbs_per_serving: recipe.nutritionalInfo.carbs,
             protein_per_serving: recipe.nutritionalInfo.protein,
             fat_per_serving: recipe.nutritionalInfo.fat,
-            created_by: preferences.profile_id,
+            sugar_per_serving: recipe.nutritionalInfo.sugar,
+            created_by: profile_id,
             is_approved: true,
           });
 
