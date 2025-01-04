@@ -19,13 +19,9 @@ serve(async (req) => {
     console.log('Generating recipe with preferences:', preferences);
     console.log('Is anonymous user:', isAnonymous);
 
-    const openAiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openAiKey) {
-      throw new Error('OpenAI API key not configured. Please set up your API key in the project settings.');
-    }
-
-    if (!openAiKey.startsWith('sk-')) {
-      throw new Error('Invalid OpenAI API key format. The key should start with "sk-"');
+    const openRouterKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openRouterKey) {
+      throw new Error('OpenRouter API key not configured');
     }
 
     // Enhanced prompt for better recipe generation
@@ -43,17 +39,19 @@ serve(async (req) => {
       3. Blood sugar friendly
       4. Include portion control guidance`;
 
-    console.log('Sending prompt to OpenAI:', prompt);
+    console.log('Sending prompt to OpenRouter:', prompt);
 
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${openAiKey}`,
+          'Authorization': `Bearer ${openRouterKey}`,
           'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://github.com/lovable-chat/lovable', // Required for OpenRouter
+          'X-Title': 'Lovable Chat', // Required for OpenRouter
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
+          model: 'anthropic/claude-2',
           messages: [
             {
               role: 'system',
@@ -71,22 +69,22 @@ serve(async (req) => {
 
       if (!response.ok) {
         const error = await response.json();
-        console.error('OpenAI API error:', error);
-        throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`);
+        console.error('OpenRouter API error:', error);
+        throw new Error(`OpenRouter API error: ${error.error?.message || 'Unknown error'}`);
       }
 
       const data = await response.json();
-      console.log('OpenAI response:', data);
+      console.log('OpenRouter response:', data);
 
       if (!data.choices?.[0]?.message?.content) {
-        throw new Error('Invalid response from OpenAI');
+        throw new Error('Invalid response from OpenRouter');
       }
 
       let recipe;
       try {
         recipe = JSON.parse(data.choices[0].message.content);
       } catch (error) {
-        console.error('Error parsing OpenAI response:', error);
+        console.error('Error parsing OpenRouter response:', error);
         throw new Error('Failed to parse recipe data');
       }
 
@@ -131,9 +129,9 @@ serve(async (req) => {
           }
         }
       );
-    } catch (openAiError) {
-      console.error('OpenAI API call failed:', openAiError);
-      throw new Error(`OpenAI API call failed: ${openAiError.message}`);
+    } catch (openRouterError) {
+      console.error('OpenRouter API call failed:', openRouterError);
+      throw new Error(`OpenRouter API call failed: ${openRouterError.message}`);
     }
   } catch (error) {
     console.error('Error in generate-recipe function:', error);
