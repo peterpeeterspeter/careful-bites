@@ -77,7 +77,7 @@ export function ProfileForm() {
 
     try {
       // First update profile
-      const { error: profileError } = await supabase
+      const profileUpdate = await supabase
         .from("profiles")
         .update({
           age: values.age ? parseInt(values.age) : null,
@@ -90,40 +90,46 @@ export function ProfileForm() {
         })
         .eq("id", user.id);
 
-      if (profileError) throw profileError;
+      if (profileUpdate.error) {
+        console.error("Error updating profile:", profileUpdate.error);
+        toast.error("Error updating profile");
+        return;
+      }
 
       // Delete existing health condition if any
-      const { error: deleteError } = await supabase
+      const deleteResult = await supabase
         .from("user_health_conditions")
         .delete()
         .eq("profile_id", user.id);
 
-      if (deleteError) {
-        console.error("Error deleting health condition:", deleteError);
-        throw deleteError;
+      if (deleteResult.error) {
+        console.error("Error deleting health condition:", deleteResult.error);
+        toast.error("Error updating health conditions");
+        return;
       }
 
       // Insert new health condition if not "none"
       if (values.health_condition !== "none") {
-        const { error: insertError } = await supabase
+        const insertResult = await supabase
           .from("user_health_conditions")
           .insert({
-            profile_id: user.id,  // Explicitly set the profile_id to the user's ID
+            profile_id: user.id,
             condition: values.health_condition,
             severity: values.condition_severity || null,
             notes: values.condition_notes || null,
           });
 
-        if (insertError) {
-          console.error("Error inserting health condition:", insertError);
-          throw insertError;
+        if (insertResult.error) {
+          console.error("Error inserting health condition:", insertResult.error);
+          toast.error("Error updating health conditions");
+          return;
         }
       }
 
       toast.success("Profile updated successfully!");
     } catch (error) {
       console.error("Error updating profile:", error);
-      toast.error("Error updating profile: " + (error as Error).message);
+      toast.error("Error updating profile");
     }
   }
 
