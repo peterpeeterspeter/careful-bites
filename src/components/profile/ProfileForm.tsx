@@ -51,6 +51,8 @@ export function ProfileForm() {
     }
 
     try {
+      console.log("Updating profile for user:", user.id);
+      
       const { error: profileError } = await supabase
         .from("profiles")
         .update({
@@ -67,16 +69,38 @@ export function ProfileForm() {
       if (profileError) throw profileError;
 
       if (values.health_condition !== "none") {
-        const { error: healthConditionError } = await supabase
+        console.log("Upserting health condition:", {
+          profile_id: user.id,
+          condition: values.health_condition,
+          severity: values.condition_severity,
+          notes: values.condition_notes,
+        });
+
+        // First, try to delete any existing condition
+        const { error: deleteError } = await supabase
           .from("user_health_conditions")
-          .upsert({
+          .delete()
+          .eq("profile_id", user.id);
+
+        if (deleteError) {
+          console.error("Error deleting existing condition:", deleteError);
+          throw deleteError;
+        }
+
+        // Then insert the new condition
+        const { error: insertError } = await supabase
+          .from("user_health_conditions")
+          .insert({
             profile_id: user.id,
             condition: values.health_condition,
             severity: values.condition_severity,
             notes: values.condition_notes,
           });
 
-        if (healthConditionError) throw healthConditionError;
+        if (insertError) {
+          console.error("Error inserting health condition:", insertError);
+          throw insertError;
+        }
       } else {
         // Delete existing health condition if set to none
         const { error: deleteError } = await supabase
@@ -89,6 +113,7 @@ export function ProfileForm() {
 
       toast.success("Profile updated successfully!");
     } catch (error) {
+      console.error("Error updating profile:", error);
       toast.error("Error updating profile: " + (error as Error).message);
     }
   }
