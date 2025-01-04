@@ -27,7 +27,7 @@ export function ProfileForm() {
         .from("user_health_conditions")
         .select("*")
         .eq("profile_id", user?.id)
-        .single();
+        .maybeSingle();
 
       return {
         age: profile?.age?.toString() || "",
