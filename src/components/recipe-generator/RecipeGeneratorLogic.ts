@@ -57,20 +57,42 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
       return null;
     }
 
-    // Parse the JSON data into properly typed recipe objects
-    const recipes = recipesData.map(recipe => ({
-      ...recipe,
-      ingredients: Array.isArray(recipe.ingredients) 
+    // Parse and validate the data from Supabase
+    const recipes = recipesData.map(recipe => {
+      // Parse ingredients
+      const ingredients = Array.isArray(recipe.ingredients) 
         ? recipe.ingredients 
         : typeof recipe.ingredients === 'string'
           ? JSON.parse(recipe.ingredients)
-          : [],
-      instructions: Array.isArray(recipe.instructions)
+          : [];
+
+      // Parse instructions
+      const instructions = Array.isArray(recipe.instructions)
         ? recipe.instructions
         : typeof recipe.instructions === 'string'
           ? JSON.parse(recipe.instructions)
-          : []
-    })) as RecipeSource[];
+          : [];
+
+      // Parse and validate nutritional info
+      const nutritionalInfo = typeof recipe.nutritional_info === 'string'
+        ? JSON.parse(recipe.nutritional_info)
+        : recipe.nutritional_info;
+
+      // Ensure nutritional info has all required fields
+      const validatedNutritionalInfo = {
+        calories: Number(nutritionalInfo?.calories) || 0,
+        carbs: Number(nutritionalInfo?.carbs) || 0,
+        protein: Number(nutritionalInfo?.protein) || 0,
+        fat: Number(nutritionalInfo?.fat) || 0
+      };
+
+      return {
+        ...recipe,
+        ingredients,
+        instructions,
+        nutritional_info: validatedNutritionalInfo
+      } as RecipeSource;
+    });
 
     // Filter out recipes with allergens if specified
     let filteredRecipes = recipes;
