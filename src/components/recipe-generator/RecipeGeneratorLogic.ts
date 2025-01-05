@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export interface RecipePreferences {
   dietaryOption: string;
@@ -10,23 +11,57 @@ export interface RecipePreferences {
 
 export const generateRecipeFromDatabase = async (preferences: RecipePreferences) => {
   try {
+    console.log('Starting recipe generation with preferences:', preferences);
+    
     let query = supabase
       .from('recipe_sources')
       .select('*')
-      .eq('diabetes_friendly', true);
+      .eq('diabetes_friendly', true)
+      .limit(50); // Limit the number of recipes to process
 
     if (preferences.cuisine) {
       query = query.eq('cuisine_type', preferences.cuisine.toLowerCase());
     }
 
+    if (preferences.dietaryOption !== 'classic') {
+      query = query.contains('tags', [preferences.dietaryOption]);
+    }
+
     const { data: recipes, error } = await query;
 
-    if (error) throw error;
-    if (!recipes?.length) return null;
+    if (error) {
+      console.error('Error fetching recipes:', error);
+      toast.error('Failed to fetch recipes. Please try again.');
+      throw error;
+    }
+
+    if (!recipes?.length) {
+      console.log('No recipes found matching the criteria');
+      toast.error('No recipes found matching your preferences. Try adjusting your filters.');
+      return null;
+    }
+
+    // Filter out recipes with allergens if specified
+    let filteredRecipes = recipes;
+    if (preferences.allergies) {
+      filteredRecipes = recipes.filter(recipe => 
+        !recipe.ingredients.some((ingredient: string) => 
+          ingredient.toLowerCase().includes(preferences.allergies.toLowerCase())
+        )
+      );
+    }
+
+    if (filteredRecipes.length === 0) {
+      console.log('No recipes found after allergy filtering');
+      toast.error('No safe recipes found considering your allergies. Try different preferences.');
+      return null;
+    }
 
     // Select a random recipe from the filtered results
-    const randomIndex = Math.floor(Math.random() * recipes.length);
-    const selectedRecipe = recipes[randomIndex];
+    const randomIndex = Math.floor(Math.random() * filteredRecipes.length);
+    const selectedRecipe = filteredRecipes[randomIndex];
+
+    console.log('Selected recipe:', selectedRecipe);
 
     // Transform to match the expected recipe format
     return {
@@ -44,6 +79,7 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
     };
   } catch (error) {
     console.error('Error generating recipe:', error);
+    toast.error('Failed to generate recipe. Please try again.');
     throw error;
   }
 };
