@@ -69,7 +69,7 @@ export default function RecipeGenerator() {
       setPreferences(prev => ({
         ...prev,
         dietaryOption: dietStyles?.[0]?.diet_style || "classic",
-        allergies: foodIntolerances?.[0]?.intolerance || "",
+        allergies: foodIntolerances?.map(i => i.intolerance).join(', ') || "",
         medicalCondition: profile?.diabetes_type || "type2",
       }));
     } catch (error) {
@@ -79,6 +79,7 @@ export default function RecipeGenerator() {
   };
 
   const generateRecipe = async () => {
+    // Prevent multiple simultaneous generations
     if (loading) {
       console.log("Generation already in progress");
       return;
@@ -90,13 +91,13 @@ export default function RecipeGenerator() {
     }
 
     setLoading(true);
-    console.log("Starting recipe generation with preferences:", preferences);
 
     try {
       const generatedRecipe = await generateRecipeFromDatabase(preferences);
 
       if (!generatedRecipe) {
-        throw new Error("No suitable recipe found");
+        toast.error("No suitable recipe found. Please try adjusting your preferences.");
+        return;
       }
 
       setRecipe(generatedRecipe);

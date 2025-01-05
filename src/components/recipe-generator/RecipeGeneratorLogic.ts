@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 export interface RecipePreferences {
   dietaryOption: string;
@@ -53,7 +52,6 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
       return null;
     }
 
-    // Transform and validate the data
     const validRecipes = recipesData
       .map(recipe => {
         try {
