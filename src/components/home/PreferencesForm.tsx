@@ -7,6 +7,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 interface PreferencesFormProps {
   dietaryOption: string;
@@ -37,6 +40,45 @@ export function PreferencesForm({
 }: PreferencesFormProps) {
   return (
     <>
+      <div>
+        <h3 className="text-sm font-medium mb-2">Medical Condition</h3>
+        <Select value={medicalCondition} onValueChange={setMedicalCondition}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select Medical Condition" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="type1">Type 1 Diabetes</SelectItem>
+            <SelectItem value="type2">Type 2 Diabetes</SelectItem>
+            <SelectItem value="prediabetic">Prediabetic</SelectItem>
+            <SelectItem value="gestational">Gestational Diabetes</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-medium mb-2">Target Blood Sugar Range</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label>Min (mg/dL)</Label>
+            <Input 
+              type="number" 
+              placeholder="70"
+              min="0"
+              max="300"
+            />
+          </div>
+          <div>
+            <Label>Max (mg/dL)</Label>
+            <Input 
+              type="number" 
+              placeholder="180"
+              min="0"
+              max="300"
+            />
+          </div>
+        </div>
+      </div>
+
       <div>
         <h3 className="text-sm font-medium mb-2">Dietary Preferences</h3>
         <Select value={dietaryOption} onValueChange={setDietaryOption}>
@@ -117,19 +159,19 @@ export function PreferencesForm({
         </Select>
       </div>
 
-      <div>
-        <h3 className="text-sm font-medium mb-2">Medical Condition</h3>
-        <Select value={medicalCondition} onValueChange={setMedicalCondition}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select Medical Condition" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="type1">Diabetic Type 1</SelectItem>
-            <SelectItem value="type2">Diabetic Type 2</SelectItem>
-            <SelectItem value="prediabetic">Prediabetic</SelectItem>
-            <SelectItem value="gestational">Gestational Diabetes</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="insulin-sensitive">Insulin Sensitive</Label>
+          <Switch id="insulin-sensitive" />
+        </div>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="low-sodium">Low Sodium Diet</Label>
+          <Switch id="low-sodium" />
+        </div>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="kidney-friendly">Kidney Friendly</Label>
+          <Switch id="kidney-friendly" />
+        </div>
       </div>
 
       <Button 
