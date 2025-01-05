@@ -3,13 +3,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useState, useCallback } from "react";
+import { useState } from "react";
 
 export function SignUpPrompt() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubscribe = useCallback(async () => {
+  const handleSubscribe = async () => {
     if (!user) {
       window.location.href = '/register';
       return;
@@ -17,37 +17,26 @@ export function SignUpPrompt() {
 
     if (isLoading) return;
 
-    let loadingToast;
     setIsLoading(true);
+    const loadingToast = toast.loading('Preparing checkout...');
 
     try {
-      loadingToast = toast.loading('Preparing checkout...');
-
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         method: 'POST',
       });
 
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw new Error(error.message);
-      }
-      
-      if (!data?.url) {
-        console.error('No checkout URL received');
-        throw new Error('No checkout URL received');
-      }
+      if (error) throw error;
+      if (!data?.url) throw new Error('No checkout URL received');
 
       window.location.href = data.url;
     } catch (error) {
       console.error('Error creating checkout session:', error);
       toast.error('Failed to start checkout process. Please try again.');
     } finally {
-      if (loadingToast) {
-        toast.dismiss(loadingToast);
-      }
+      toast.dismiss(loadingToast);
       setIsLoading(false);
     }
-  }, [user, isLoading]);
+  };
 
   return (
     <Card className="bg-green-50 border-green-200">
