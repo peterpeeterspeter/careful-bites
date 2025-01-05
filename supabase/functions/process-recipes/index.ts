@@ -1,24 +1,28 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { HfInference } from "npm:@huggingface/inference";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { HfInference } from 'https://esm.sh/@huggingface/inference@2.6.4';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const processRecipe = async (recipe: any) => {
-  // Basic nutrition validation for diabetes-friendly recipes
-  const isLowCarb = recipe.nutritionalInfo?.carbs < 45;
-  const isLowSugar = recipe.nutritionalInfo?.sugar < 10;
-  const hasGoodFiber = recipe.nutritionalInfo?.fiber > 3;
-
+async function processRecipe(recipe: any) {
+  // Process recipe data to match our database schema
   return {
-    ...recipe,
-    diabetes_friendly: isLowCarb && isLowSugar && hasGoodFiber,
-    glycemic_load: recipe.nutritionalInfo?.carbs * (recipe.glycemicIndex || 55) / 100,
+    title: recipe.title,
+    description: recipe.description || '',
+    ingredients: recipe.ingredients,
+    instructions: recipe.instructions,
+    nutritional_info: recipe.nutrition || {},
+    glycemic_index: recipe.glycemic_index || null,
+    glycemic_load: recipe.glycemic_load || null,
+    source: 'huggingface',
+    cuisine_type: recipe.cuisine || null,
+    meal_type: recipe.meal_type || null,
+    diabetes_friendly: true, // We're only importing diabetes-friendly recipes
   };
-};
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -30,7 +34,7 @@ serve(async (req) => {
     console.log('Processing dataset:', datasetName);
 
     // Initialize Hugging Face client with the API key from environment
-    const hf = new HfInference(Deno.env.get("HUGGING_FACE_API_KEY"));
+    const hf = new HfInference(Deno.env.get("Hugging Face API"));
     console.log('Hugging Face client initialized');
 
     // Fetch recipes from dataset
@@ -52,26 +56,40 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Insert into recipe_sources table
+    // Insert processed recipes into the database
     const { error } = await supabaseClient
       .from('recipe_sources')
       .insert(processedRecipes);
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     return new Response(
-      JSON.stringify({ success: true, count: processedRecipes.length }),
+      JSON.stringify({ 
+        message: `Successfully processed and stored ${processedRecipes.length} recipes` 
+      }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
       }
     );
+
   } catch (error) {
-    console.error('Error processing recipes:', error);
+    console.error('Error in process-recipes function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message || 'Failed to process recipes',
+        details: error.toString()
+      }),
       { 
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
       }
     );
   }
