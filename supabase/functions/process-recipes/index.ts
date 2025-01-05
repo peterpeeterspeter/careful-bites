@@ -29,19 +29,22 @@ serve(async (req) => {
     const { datasetName } = await req.json();
     console.log('Processing dataset:', datasetName);
 
-    // Initialize Hugging Face client
-    const hf = new HfInference(Deno.env.get("HUGGINGFACE_API_KEY"));
+    // Initialize Hugging Face client with the API key from environment
+    const hf = new HfInference(Deno.env.get("HUGGING_FACE_API_KEY"));
+    console.log('Hugging Face client initialized');
 
     // Fetch recipes from dataset
     const response = await fetch(
       `https://huggingface.co/datasets/${datasetName}/raw/main/data.json`
     );
     const recipes = await response.json();
+    console.log(`Fetched ${recipes.length} recipes from dataset`);
 
     // Process recipes and prepare for database insertion
     const processedRecipes = await Promise.all(
       recipes.map(processRecipe)
     );
+    console.log(`Processed ${processedRecipes.length} recipes`);
 
     // Initialize Supabase client
     const supabaseClient = createClient(
