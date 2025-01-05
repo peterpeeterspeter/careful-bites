@@ -38,10 +38,14 @@ export default function RecipeGenerator() {
     if (!mounted.current) return;
 
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const accessToken = sessionData.session?.access_token;
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        return;
+      }
 
-      if (!accessToken) {
+      if (!session?.access_token) {
         console.error('No access token available');
         return;
       }
@@ -50,7 +54,7 @@ export default function RecipeGenerator() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`
+          'Authorization': `Bearer ${session.access_token}`
         },
       });
 
@@ -117,7 +121,9 @@ export default function RecipeGenerator() {
       }
     } catch (error) {
       console.error("Error generating recipe:", error);
-      toast.error("Failed to generate recipe. Please try again.");
+      if (mounted.current) {
+        toast.error("Failed to generate recipe. Please try again.");
+      }
     } finally {
       if (mounted.current) {
         setLoading(false);
