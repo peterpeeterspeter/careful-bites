@@ -3,9 +3,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useState } from "react";
 
 export function SignUpPrompt() {
   const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubscribe = async () => {
     if (!user) {
@@ -13,21 +15,28 @@ export function SignUpPrompt() {
       return;
     }
 
+    if (isLoading) return;
+
+    setIsLoading(true);
+    toast.loading('Preparing checkout...');
+
     try {
-      toast.loading('Preparing checkout...');
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         method: 'POST',
       });
 
       if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
+      
+      if (!data?.url) {
         throw new Error('No checkout URL received');
       }
+
+      window.location.href = data.url;
     } catch (error) {
       console.error('Error creating checkout session:', error);
+      toast.dismiss();
       toast.error('Failed to start checkout process. Please try again.');
+      setIsLoading(false);
     }
   };
 
@@ -40,9 +49,10 @@ export function SignUpPrompt() {
         </p>
         <Button
           onClick={handleSubscribe}
+          disabled={isLoading}
           className="bg-[#4CAF50] hover:bg-[#45a049]"
         >
-          {user ? 'Subscribe Now' : 'Sign Up - It\'s Free'}
+          {isLoading ? 'Processing...' : user ? 'Subscribe Now' : 'Sign Up - It\'s Free'}
         </Button>
       </CardContent>
     </Card>
