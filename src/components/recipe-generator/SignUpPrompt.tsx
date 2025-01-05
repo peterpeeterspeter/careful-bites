@@ -15,12 +15,12 @@ export function SignUpPrompt() {
       return;
     }
 
+    // Prevent multiple clicks while loading
     if (isLoading) return;
 
-    setIsLoading(true);
-    const loadingToast = toast.loading('Preparing checkout...');
-
     try {
+      setIsLoading(true);
+      
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         method: 'POST',
       });
@@ -28,12 +28,12 @@ export function SignUpPrompt() {
       if (error) throw error;
       if (!data?.url) throw new Error('No checkout URL received');
 
+      // Only redirect if we have a valid URL
       window.location.href = data.url;
     } catch (error) {
       console.error('Error creating checkout session:', error);
       toast.error('Failed to start checkout process. Please try again.');
-    } finally {
-      toast.dismiss(loadingToast);
+      // Make sure to reset loading state on error
       setIsLoading(false);
     }
   };
