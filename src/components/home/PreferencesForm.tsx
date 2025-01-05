@@ -1,4 +1,4 @@
-import { SparklesIcon } from "lucide-react";
+import { SparklesIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { MedicalConditionField } from "./preferences/MedicalConditionField";
@@ -21,6 +21,7 @@ interface PreferencesFormProps {
   cuisine: string;
   setCuisine: (value: string) => void;
   onSubmit: () => void;
+  isLoading?: boolean;
 }
 
 export function PreferencesForm({
@@ -35,6 +36,7 @@ export function PreferencesForm({
   cuisine,
   setCuisine,
   onSubmit,
+  isLoading,
 }: PreferencesFormProps) {
   const [minBloodSugar, setMinBloodSugar] = useState("70");
   const [maxBloodSugar, setMaxBloodSugar] = useState("180");
@@ -88,9 +90,19 @@ export function PreferencesForm({
       <Button 
         className="w-full shadow-sm"
         onClick={onSubmit}
+        disabled={isLoading}
       >
-        <SparklesIcon className="mr-2 h-5 w-5" />
-        Generate Recipe
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Generating Recipe...
+          </>
+        ) : (
+          <>
+            <SparklesIcon className="mr-2 h-5 w-5" />
+            Generate Recipe
+          </>
+        )}
       </Button>
     </>
   );

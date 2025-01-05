@@ -18,9 +18,10 @@ interface PreferencesPanelProps {
     medicalCondition: string;
     cuisine: string;
   }) => void;
+  isLoading?: boolean;
 }
 
-export function PreferencesPanel({ onClose, onSubmit }: PreferencesPanelProps) {
+export function PreferencesPanel({ onClose, onSubmit, isLoading }: PreferencesPanelProps) {
   const [dietaryOption, setDietaryOption] = useState("");
   const [allergies, setAllergies] = useState("");
   const [dislikes, setDislikes] = useState("");
@@ -28,13 +29,15 @@ export function PreferencesPanel({ onClose, onSubmit }: PreferencesPanelProps) {
   const [cuisine, setCuisine] = useState("");
 
   const handleSubmit = () => {
-    onSubmit({
-      dietaryOption,
-      allergies,
-      dislikes,
-      medicalCondition,
-      cuisine,
-    });
+    if (!isLoading) {
+      onSubmit({
+        dietaryOption,
+        allergies,
+        dislikes,
+        medicalCondition,
+        cuisine,
+      });
+    }
   };
 
   return (
@@ -46,6 +49,7 @@ export function PreferencesPanel({ onClose, onSubmit }: PreferencesPanelProps) {
             variant="ghost" 
             size="icon"
             onClick={onClose}
+            disabled={isLoading}
             className="h-8 w-8"
           >
             <ChevronLeftIcon className="h-4 w-4" />
@@ -65,6 +69,7 @@ export function PreferencesPanel({ onClose, onSubmit }: PreferencesPanelProps) {
           cuisine={cuisine}
           setCuisine={setCuisine}
           onSubmit={handleSubmit}
+          isLoading={isLoading}
         />
       </CardContent>
     </Card>

@@ -57,14 +57,14 @@ export default function RecipeGenerator() {
       return;
     }
 
-    setLoading(true);
-
     try {
+      setLoading(true);
+      console.log('Starting recipe generation with preferences:', preferences);
+      
       const generatedRecipe = await generateRecipeFromDatabase(preferences);
 
       if (!generatedRecipe) {
         toast.error("No suitable recipe found. Please try adjusting your preferences.");
-        setLoading(false);
         return;
       }
 
