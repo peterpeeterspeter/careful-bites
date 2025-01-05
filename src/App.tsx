@@ -1,15 +1,15 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { MainLayout } from "@/components/MainLayout";
-import { Index } from "@/pages/Index";
-import { Login } from "@/pages/Login";
-import { Register } from "@/pages/Register";
-import { Profile } from "@/pages/Profile";
-import { ProfileSetup } from "@/pages/ProfileSetup";
-import { RecipeGenerator } from "@/pages/RecipeGenerator";
-import { RecipeDetail } from "@/pages/RecipeDetail";
-import { RecipeArchive } from "@/pages/RecipeArchive";
-import { MealPlanning } from "@/pages/MealPlanning";
-import { MealPlanningCalendar } from "@/pages/MealPlanningCalendar";
+import Index from "@/pages/Index";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+import Profile from "@/pages/Profile";
+import ProfileSetup from "@/pages/ProfileSetup";
+import RecipeGenerator from "@/pages/RecipeGenerator";
+import RecipeDetail from "@/pages/RecipeDetail";
+import RecipeArchive from "@/pages/RecipeArchive";
+import MealPlanning from "@/pages/MealPlanning";
+import MealPlanningCalendar from "@/pages/MealPlanningCalendar";
 
 function App() {
   return (
