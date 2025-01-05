@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { MainLayout } from "@/components/MainLayout";
 import Index from "@/pages/Index";
 import Login from "@/pages/Login";
@@ -13,22 +13,20 @@ import MealPlanningCalendar from "@/pages/MealPlanningCalendar";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/profile-setup" element={<ProfileSetup />} />
-          <Route path="/recipe-generator" element={<RecipeGenerator />} />
-          <Route path="/recipe/:id" element={<RecipeDetail />} />
-          <Route path="/recipes" element={<RecipeArchive />} />
-          <Route path="/meal-planning" element={<MealPlanning />} />
-          <Route path="/meal-planning-calendar" element={<MealPlanningCalendar />} />
-        </Route>
-      </Routes>
-    </Router>
+    <Routes>
+      <Route element={<MainLayout />}>
+        <Route path="/" element={<Index />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile-setup" element={<ProfileSetup />} />
+        <Route path="/recipe-generator" element={<RecipeGenerator />} />
+        <Route path="/recipe/:id" element={<RecipeDetail />} />
+        <Route path="/recipes" element={<RecipeArchive />} />
+        <Route path="/meal-planning" element={<MealPlanning />} />
+        <Route path="/meal-planning-calendar" element={<MealPlanningCalendar />} />
+      </Route>
+    </Routes>
   );
 }
 
