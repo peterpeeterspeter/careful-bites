@@ -5,13 +5,13 @@ export const activityLevels = ['sedentary', 'lightly_active', 'moderately_active
 export const healthConditions = ['none', 'kidney_disease', 'heart_disease', 'digestive_issues'] as const;
 
 export const profileFormSchema = z.object({
-  age: z.string().min(1, "Age is required").or(z.literal('')),
-  height_cm: z.string().min(1, "Height is required").or(z.literal('')),
-  current_weight_kg: z.string().min(1, "Current weight is required").or(z.literal('')),
-  target_weight_kg: z.string().min(1, "Target weight is required").or(z.literal('')),
+  age: z.string().min(1, "Age is required"),
+  height_cm: z.string().min(1, "Height is required"),
+  current_weight_kg: z.string().min(1, "Current weight is required"),
+  target_weight_kg: z.string().min(1, "Target weight is required"),
   diabetes_type: z.enum(diabetesTypes),
   activity_level: z.enum(activityLevels),
-  daily_calorie_target: z.string().min(1, "Daily calorie target is required").or(z.literal('')),
+  daily_calorie_target: z.string().min(1, "Daily calorie target is required"),
   health_condition: z.enum(healthConditions),
   condition_severity: z.string().optional(),
   condition_notes: z.string().optional(),
