@@ -17,6 +17,7 @@ export function HeroSection() {
   const [allergies, setAllergies] = useState("");
   const [dislikes, setDislikes] = useState("");
   const [medicalCondition, setMedicalCondition] = useState("");
+  const [cuisine, setCuisine] = useState("");
 
   const handleGetStarted = () => {
     navigate("/recipe-generator", { 
@@ -25,7 +26,8 @@ export function HeroSection() {
           dietaryOption,
           allergies,
           dislikes,
-          medicalCondition
+          medicalCondition,
+          cuisine
         } 
       }
     });
@@ -64,6 +66,27 @@ export function HeroSection() {
                   <SelectItem value="vegetarian">Vegetarian</SelectItem>
                   <SelectItem value="vegan">Vegan</SelectItem>
                   <SelectItem value="pescatarian">Pescatarian</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-medium mb-2">Cuisine Type</h3>
+              <Select value={cuisine} onValueChange={setCuisine}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Cuisine" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="italian">Italian</SelectItem>
+                  <SelectItem value="mexican">Mexican</SelectItem>
+                  <SelectItem value="chinese">Chinese</SelectItem>
+                  <SelectItem value="japanese">Japanese</SelectItem>
+                  <SelectItem value="indian">Indian</SelectItem>
+                  <SelectItem value="mediterranean">Mediterranean</SelectItem>
+                  <SelectItem value="american">American</SelectItem>
+                  <SelectItem value="french">French</SelectItem>
+                  <SelectItem value="thai">Thai</SelectItem>
+                  <SelectItem value="greek">Greek</SelectItem>
                 </SelectContent>
               </Select>
             </div>
