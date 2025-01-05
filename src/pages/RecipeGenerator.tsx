@@ -13,6 +13,7 @@ export default function RecipeGenerator() {
   const [recipe, setRecipe] = useState(null);
   const [generationsLeft, setGenerationsLeft] = useState(3);
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const mounted = useRef(true);
   const [preferences, setPreferences] = useState<RecipePreferences>({
     dietaryOption: "classic",
     allergies: "",
@@ -20,9 +21,6 @@ export default function RecipeGenerator() {
     medicalCondition: "type2",
     cuisine: ""
   });
-
-  // Add mounted ref to prevent state updates after unmount
-  const mounted = useRef(true);
 
   useEffect(() => {
     return () => {
