@@ -8,48 +8,25 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-
-const dietaryOptions = [
-  {
-    label: "Gluten-Free",
-    value: "gluten-free",
-    description: "Recipes without gluten-containing ingredients"
-  },
-  {
-    label: "Keto",
-    value: "keto",
-    description: "Low-carb, high-fat recipes"
-  },
-  {
-    label: "Vegetarian",
-    value: "vegetarian",
-    description: "Meat-free recipes"
-  },
-  {
-    label: "Low-Fat",
-    value: "low-fat",
-    description: "Recipes with reduced fat content"
-  },
-  {
-    label: "Sugar-Free",
-    value: "sugar-free",
-    description: "No added sugars"
-  },
-  {
-    label: "Gentle on Stomach",
-    value: "stomach-friendly",
-    description: "Easy to digest recipes"
-  }
-];
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function HeroSection() {
   const navigate = useNavigate();
-  const [selectedDiets, setSelectedDiets] = useState<string[]>([]);
+  const [dietaryOption, setDietaryOption] = useState("");
+  const [allergies, setAllergies] = useState("");
+  const [dislikes, setDislikes] = useState("");
+  const [medicalCondition, setMedicalCondition] = useState("");
 
   const handleGetStarted = () => {
     navigate("/recipe-generator", { 
-      state: { preferences: { dietary: selectedDiets } }
+      state: { 
+        preferences: { 
+          dietaryOption,
+          allergies,
+          dislikes,
+          medicalCondition
+        } 
+      }
     });
   };
 
@@ -87,36 +64,79 @@ export function HeroSection() {
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-medium mb-2">Dietary Requirements</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Select all that apply to your diet
-                </p>
-                <ToggleGroup 
-                  type="multiple"
-                  value={selectedDiets}
-                  onValueChange={setSelectedDiets}
-                  className="grid grid-cols-2 gap-3"
-                >
-                  {dietaryOptions.map((option) => (
-                    <ToggleGroupItem
-                      key={option.value}
-                      value={option.value}
-                      aria-label={option.label}
-                      className="flex flex-col items-center justify-center p-4 rounded-lg border border-gray-100 shadow-sm hover:bg-primary-50 data-[state=on]:bg-primary-100 data-[state=on]:border-primary-200 transition-all duration-200"
-                    >
-                      <span className="font-medium text-gray-800">{option.label}</span>
-                      <span className="text-xs text-gray-500 text-center mt-1">
-                        {option.description}
-                      </span>
-                    </ToggleGroupItem>
-                  ))}
-                </ToggleGroup>
+                <h3 className="text-lg font-medium mb-4">Dietary Preferences</h3>
+                <div className="space-y-4">
+                  <Select value={dietaryOption} onValueChange={setDietaryOption}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Dietary Option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="classic">Classic</SelectItem>
+                      <SelectItem value="low-carb">Low Carb</SelectItem>
+                      <SelectItem value="keto">Keto</SelectItem>
+                      <SelectItem value="paleo">Paleo</SelectItem>
+                      <SelectItem value="vegetarian">Vegetarian</SelectItem>
+                      <SelectItem value="vegan">Vegan</SelectItem>
+                      <SelectItem value="pescatarian">Pescatarian</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={allergies} onValueChange={setAllergies}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Allergies" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="shellfish">Shellfish</SelectItem>
+                      <SelectItem value="fish">Fish</SelectItem>
+                      <SelectItem value="gluten">Gluten</SelectItem>
+                      <SelectItem value="dairy">Dairy</SelectItem>
+                      <SelectItem value="peanut">Peanut</SelectItem>
+                      <SelectItem value="soy">Soy</SelectItem>
+                      <SelectItem value="egg">Egg</SelectItem>
+                      <SelectItem value="mustard">Mustard</SelectItem>
+                      <SelectItem value="sesame">Sesame</SelectItem>
+                      <SelectItem value="nightshade">Nightshade</SelectItem>
+                      <SelectItem value="sulfite">Sulfite</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={dislikes} onValueChange={setDislikes}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Dislikes" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="avocado">Avocado</SelectItem>
+                      <SelectItem value="beef">Beef</SelectItem>
+                      <SelectItem value="beets">Beets</SelectItem>
+                      <SelectItem value="bell-peppers">Bell Peppers</SelectItem>
+                      <SelectItem value="blue-cheese">Blue Cheese</SelectItem>
+                      <SelectItem value="sprouts">Sprouts</SelectItem>
+                      <SelectItem value="cauliflower">Cauliflower</SelectItem>
+                      <SelectItem value="eggplant">Eggplant</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
 
             <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-medium mb-4">Medical Profile</h3>
+                <Select value={medicalCondition} onValueChange={setMedicalCondition}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Medical Condition" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="type1">Diabetic Type 1</SelectItem>
+                    <SelectItem value="type2">Diabetic Type 2</SelectItem>
+                    <SelectItem value="prediabetic">Prediabetic</SelectItem>
+                    <SelectItem value="gestational">Gestational Diabetes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="bg-secondary/5 p-6 rounded-xl">
                 <h3 className="text-lg font-medium mb-4">Diabetes-Friendly Features</h3>
                 <div className="grid gap-4">
