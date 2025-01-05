@@ -1,15 +1,10 @@
 import { SparklesIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { useState } from "react";
+import { MedicalConditionField } from "./preferences/MedicalConditionField";
+import { BloodSugarRangeField } from "./preferences/BloodSugarRangeField";
+import { DietaryPreferencesField } from "./preferences/DietaryPreferencesField";
+import { HealthSwitches } from "./preferences/HealthSwitches";
 
 interface PreferencesFormProps {
   dietaryOption: string;
@@ -38,64 +33,30 @@ export function PreferencesForm({
   setCuisine,
   onSubmit,
 }: PreferencesFormProps) {
+  const [minBloodSugar, setMinBloodSugar] = useState("70");
+  const [maxBloodSugar, setMaxBloodSugar] = useState("180");
+  const [insulinSensitive, setInsulinSensitive] = useState(false);
+  const [lowSodium, setLowSodium] = useState(false);
+  const [kidneyFriendly, setKidneyFriendly] = useState(false);
+
   return (
     <>
-      <div>
-        <h3 className="text-sm font-medium mb-2">Medical Condition</h3>
-        <Select value={medicalCondition} onValueChange={setMedicalCondition}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select Medical Condition" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="type1">Type 1 Diabetes</SelectItem>
-            <SelectItem value="type2">Type 2 Diabetes</SelectItem>
-            <SelectItem value="prediabetic">Prediabetic</SelectItem>
-            <SelectItem value="gestational">Gestational Diabetes</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <MedicalConditionField 
+        value={medicalCondition}
+        onChange={setMedicalCondition}
+      />
 
-      <div>
-        <h3 className="text-sm font-medium mb-2">Target Blood Sugar Range</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label>Min (mg/dL)</Label>
-            <Input 
-              type="number" 
-              placeholder="70"
-              min="0"
-              max="300"
-            />
-          </div>
-          <div>
-            <Label>Max (mg/dL)</Label>
-            <Input 
-              type="number" 
-              placeholder="180"
-              min="0"
-              max="300"
-            />
-          </div>
-        </div>
-      </div>
+      <BloodSugarRangeField
+        minValue={minBloodSugar}
+        maxValue={maxBloodSugar}
+        onMinChange={setMinBloodSugar}
+        onMaxChange={setMaxBloodSugar}
+      />
 
-      <div>
-        <h3 className="text-sm font-medium mb-2">Dietary Preferences</h3>
-        <Select value={dietaryOption} onValueChange={setDietaryOption}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select Dietary Option" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="classic">Classic</SelectItem>
-            <SelectItem value="low-carb">Low Carb</SelectItem>
-            <SelectItem value="keto">Keto</SelectItem>
-            <SelectItem value="paleo">Paleo</SelectItem>
-            <SelectItem value="vegetarian">Vegetarian</SelectItem>
-            <SelectItem value="vegan">Vegan</SelectItem>
-            <SelectItem value="pescatarian">Pescatarian</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <DietaryPreferencesField
+        value={dietaryOption}
+        onChange={setDietaryOption}
+      />
 
       <div>
         <h3 className="text-sm font-medium mb-2">Cuisine Type</h3>
@@ -159,20 +120,14 @@ export function PreferencesForm({
         </Select>
       </div>
 
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="insulin-sensitive">Insulin Sensitive</Label>
-          <Switch id="insulin-sensitive" />
-        </div>
-        <div className="flex items-center justify-between">
-          <Label htmlFor="low-sodium">Low Sodium Diet</Label>
-          <Switch id="low-sodium" />
-        </div>
-        <div className="flex items-center justify-between">
-          <Label htmlFor="kidney-friendly">Kidney Friendly</Label>
-          <Switch id="kidney-friendly" />
-        </div>
-      </div>
+      <HealthSwitches
+        insulinSensitive={insulinSensitive}
+        lowSodium={lowSodium}
+        kidneyFriendly={kidneyFriendly}
+        onInsulinSensitiveChange={setInsulinSensitive}
+        onLowSodiumChange={setLowSodium}
+        onKidneyFriendlyChange={setKidneyFriendly}
+      />
 
       <Button 
         className="w-full shadow-sm"
