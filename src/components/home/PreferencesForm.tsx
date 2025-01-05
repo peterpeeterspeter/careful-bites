@@ -1,17 +1,13 @@
 import { SparklesIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { MedicalConditionField } from "./preferences/MedicalConditionField";
 import { BloodSugarRangeField } from "./preferences/BloodSugarRangeField";
 import { DietaryPreferencesField } from "./preferences/DietaryPreferencesField";
 import { HealthSwitches } from "./preferences/HealthSwitches";
+import { CuisineField } from "./preferences/CuisineField";
+import { AllergiesField } from "./preferences/AllergiesField";
+import { DislikesField } from "./preferences/DislikesField";
 
 interface PreferencesFormProps {
   dietaryOption: string;
@@ -65,67 +61,20 @@ export function PreferencesForm({
         onChange={setDietaryOption}
       />
 
-      <div>
-        <h3 className="text-sm font-medium mb-2">Cuisine Type</h3>
-        <Select value={cuisine} onValueChange={setCuisine}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select Cuisine" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="italian">Italian</SelectItem>
-            <SelectItem value="mexican">Mexican</SelectItem>
-            <SelectItem value="chinese">Chinese</SelectItem>
-            <SelectItem value="japanese">Japanese</SelectItem>
-            <SelectItem value="indian">Indian</SelectItem>
-            <SelectItem value="mediterranean">Mediterranean</SelectItem>
-            <SelectItem value="american">American</SelectItem>
-            <SelectItem value="french">French</SelectItem>
-            <SelectItem value="thai">Thai</SelectItem>
-            <SelectItem value="greek">Greek</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <CuisineField
+        value={cuisine}
+        onChange={setCuisine}
+      />
 
-      <div>
-        <h3 className="text-sm font-medium mb-2">Allergies</h3>
-        <Select value={allergies} onValueChange={setAllergies}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select Allergies" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="shellfish">Shellfish</SelectItem>
-            <SelectItem value="fish">Fish</SelectItem>
-            <SelectItem value="gluten">Gluten</SelectItem>
-            <SelectItem value="dairy">Dairy</SelectItem>
-            <SelectItem value="peanut">Peanut</SelectItem>
-            <SelectItem value="soy">Soy</SelectItem>
-            <SelectItem value="egg">Egg</SelectItem>
-            <SelectItem value="mustard">Mustard</SelectItem>
-            <SelectItem value="sesame">Sesame</SelectItem>
-            <SelectItem value="nightshade">Nightshade</SelectItem>
-            <SelectItem value="sulfite">Sulfite</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <AllergiesField
+        value={allergies}
+        onChange={setAllergies}
+      />
 
-      <div>
-        <h3 className="text-sm font-medium mb-2">Dislikes</h3>
-        <Select value={dislikes} onValueChange={setDislikes}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select Dislikes" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="avocado">Avocado</SelectItem>
-            <SelectItem value="beef">Beef</SelectItem>
-            <SelectItem value="beets">Beets</SelectItem>
-            <SelectItem value="bell-peppers">Bell Peppers</SelectItem>
-            <SelectItem value="blue-cheese">Blue Cheese</SelectItem>
-            <SelectItem value="sprouts">Sprouts</SelectItem>
-            <SelectItem value="cauliflower">Cauliflower</SelectItem>
-            <SelectItem value="eggplant">Eggplant</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <DislikesField
+        value={dislikes}
+        onChange={setDislikes}
+      />
 
       <HealthSwitches
         insulinSensitive={insulinSensitive}
