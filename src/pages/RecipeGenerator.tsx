@@ -80,11 +80,13 @@ export default function RecipeGenerator() {
   };
 
   const generateRecipe = async () => {
+    // Prevent multiple generations if already loading
     if (loading) {
       console.log("Generation already in progress");
-      return; // Prevent multiple simultaneous generations
+      return;
     }
 
+    // Check if user has generations left
     if (!user && generationsLeft <= 0) {
       toast.error("You've used all your free generations. Please sign up to continue!");
       return;
@@ -104,6 +106,8 @@ export default function RecipeGenerator() {
       if (error) throw error;
 
       console.log("Recipe generation successful:", data);
+      
+      // Only update recipe if component is still mounted and generation wasn't cancelled
       setRecipe(data.recipe);
       
       // Update free generations count for anonymous users
