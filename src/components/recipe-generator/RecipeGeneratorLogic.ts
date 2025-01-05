@@ -25,21 +25,24 @@ interface RecipeSource {
 }
 
 export const generateRecipeFromDatabase = async (preferences: RecipePreferences) => {
+  console.log('Generating recipe with preferences:', preferences);
+
   try {
     let query = supabase
       .from('recipe_sources')
       .select('*')
-      .eq('diabetes_friendly', true)
-      .limit(50);
+      .eq('diabetes_friendly', true);
 
+    // Apply filters based on preferences
     if (preferences.cuisine) {
       query = query.eq('cuisine_type', preferences.cuisine.toLowerCase());
     }
 
-    if (preferences.dietaryOption !== 'classic') {
-      query = query.contains('tags', [preferences.dietaryOption]);
+    if (preferences.dietaryOption && preferences.dietaryOption !== 'classic') {
+      query = query.contains('tags', [preferences.dietaryOption.toLowerCase()]);
     }
 
+    // Fetch recipes
     const { data: recipesData, error } = await query;
 
     if (error) {
@@ -51,6 +54,8 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
       console.log('No recipes found matching the criteria');
       return null;
     }
+
+    console.log(`Found ${recipesData.length} matching recipes`);
 
     const validRecipes = recipesData
       .map(recipe => {
@@ -72,6 +77,7 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
             : recipe.nutritional_info;
 
           if (!nutritionalInfo || typeof nutritionalInfo !== 'object') {
+            console.log('Invalid nutritional info for recipe:', recipe.title);
             return null;
           }
 
@@ -98,11 +104,17 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
       .filter((recipe): recipe is RecipeSource => recipe !== null);
 
     if (validRecipes.length === 0) {
+      console.log('No valid recipes found after processing');
       return null;
     }
 
+    console.log(`Found ${validRecipes.length} valid recipes after processing`);
+
+    // Select a random recipe from the valid ones
     const randomIndex = Math.floor(Math.random() * validRecipes.length);
     const selectedRecipe = validRecipes[randomIndex];
+
+    console.log('Selected recipe:', selectedRecipe.title);
 
     return {
       title: selectedRecipe.title,
