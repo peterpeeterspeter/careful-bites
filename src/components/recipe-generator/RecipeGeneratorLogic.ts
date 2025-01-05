@@ -9,6 +9,17 @@ export interface RecipePreferences {
   cuisine: string;
 }
 
+interface RecipeSource {
+  title: string;
+  description: string | null;
+  ingredients: string[];  // Now properly typed as string array
+  instructions: string[];
+  nutritional_info: Record<string, any>;
+  glycemic_index: number | null;
+  glycemic_load: number | null;
+  cuisine_type: string | null;
+}
+
 export const generateRecipeFromDatabase = async (preferences: RecipePreferences) => {
   try {
     console.log('Starting recipe generation with preferences:', preferences);
@@ -42,10 +53,10 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
     }
 
     // Filter out recipes with allergens if specified
-    let filteredRecipes = recipes;
+    let filteredRecipes = recipes as RecipeSource[];
     if (preferences.allergies) {
-      filteredRecipes = recipes.filter(recipe => 
-        !recipe.ingredients.some((ingredient: string) => 
+      filteredRecipes = filteredRecipes.filter(recipe => 
+        !recipe.ingredients.some(ingredient => 
           ingredient.toLowerCase().includes(preferences.allergies.toLowerCase())
         )
       );
