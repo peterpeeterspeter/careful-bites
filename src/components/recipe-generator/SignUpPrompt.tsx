@@ -5,22 +5,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState, useCallback } from "react";
 import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function SignUpPrompt() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubscribe = useCallback(async () => {
     if (!user) {
-      window.location.href = '/register';
+      navigate('/register');
       return;
     }
 
     if (isLoading) return;
 
+    const toastId = 'checkout-process';
+    
     try {
       setIsLoading(true);
-      toast.loading('Preparing checkout...', { id: 'checkout' });
+      toast.loading('Preparing checkout...', { id: toastId });
 
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         method: 'POST',
@@ -29,14 +33,15 @@ export function SignUpPrompt() {
       if (error) throw error;
       if (!data?.url) throw new Error('No checkout URL received');
 
-      toast.dismiss('checkout');
-      window.location.href = data.url;
+      toast.dismiss(toastId);
+      window.location.assign(data.url);
     } catch (error) {
       console.error('Error creating checkout session:', error);
-      toast.error('Failed to start checkout process. Please try again.', { id: 'checkout' });
+      toast.error('Failed to start checkout process. Please try again.', { id: toastId });
+    } finally {
       setIsLoading(false);
     }
-  }, [user, isLoading]);
+  }, [user, isLoading, navigate]);
 
   return (
     <Card className="bg-green-50 border-green-200">
