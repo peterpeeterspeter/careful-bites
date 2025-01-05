@@ -38,7 +38,7 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
       query = query.contains('tags', [preferences.dietaryOption]);
     }
 
-    const { data: recipes, error } = await query;
+    const { data: recipesData, error } = await query;
 
     if (error) {
       console.error('Error fetching recipes:', error);
@@ -46,20 +46,28 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
       throw error;
     }
 
-    if (!recipes?.length) {
+    if (!recipesData?.length) {
       console.log('No recipes found matching the criteria');
       toast.error('No recipes found matching your preferences. Try adjusting your filters.');
       return null;
     }
 
+    // Cast the data to our RecipeSource type
+    const recipes = recipesData as RecipeSource[];
+
     // Filter out recipes with allergens if specified
-    let filteredRecipes = recipes as RecipeSource[];
+    let filteredRecipes = recipes;
     if (preferences.allergies) {
-      filteredRecipes = filteredRecipes.filter(recipe => 
-        !recipe.ingredients.some(ingredient => 
+      filteredRecipes = recipes.filter(recipe => {
+        // Ensure ingredients is treated as an array
+        const ingredientsArray = Array.isArray(recipe.ingredients) 
+          ? recipe.ingredients 
+          : [];
+        
+        return !ingredientsArray.some(ingredient => 
           ingredient.toLowerCase().includes(preferences.allergies.toLowerCase())
-        )
-      );
+        );
+      });
     }
 
     if (filteredRecipes.length === 0) {
@@ -78,8 +86,12 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
     return {
       title: selectedRecipe.title,
       description: selectedRecipe.description || '',
-      ingredients: selectedRecipe.ingredients,
-      instructions: selectedRecipe.instructions,
+      ingredients: Array.isArray(selectedRecipe.ingredients) 
+        ? selectedRecipe.ingredients 
+        : [],
+      instructions: Array.isArray(selectedRecipe.instructions) 
+        ? selectedRecipe.instructions 
+        : [],
       nutritionalInfo: selectedRecipe.nutritional_info,
       preparationTime: 30, // Default value
       cookingTime: 30, // Default value
