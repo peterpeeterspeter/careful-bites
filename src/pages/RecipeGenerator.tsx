@@ -13,6 +13,7 @@ export default function RecipeGenerator() {
   const [recipe, setRecipe] = useState(null);
   const [generationsLeft, setGenerationsLeft] = useState(3);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
   const [preferences, setPreferences] = useState<RecipePreferences>({
     dietaryOption: "classic",
     allergies: "",
@@ -22,65 +23,25 @@ export default function RecipeGenerator() {
   });
 
   useEffect(() => {
-    const storedGenerations = localStorage.getItem('freeGenerationsLeft');
-    if (storedGenerations === null) {
-      localStorage.setItem('freeGenerationsLeft', '3');
-    } else {
-      setGenerationsLeft(parseInt(storedGenerations));
-    }
-
     if (user) {
-      fetchUserPreferences();
+      checkSubscription();
     }
   }, [user]);
 
-  const fetchUserPreferences = async () => {
-    if (!user?.id) return;
-
+  const checkSubscription = async () => {
     try {
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("diabetes_type, dietary_restrictions")
-        .eq("id", user.id)
-        .maybeSingle();
+      const { data, error } = await supabase.functions.invoke('check-subscription', {
+        method: 'POST',
+      });
 
-      if (profileError) throw profileError;
-
-      const { data: dietaryPreferences, error: dietaryError } = await supabase
-        .from("dietary_preferences")
-        .select("restriction")
-        .eq("profile_id", user.id);
-
-      if (dietaryError) throw dietaryError;
-
-      const { data: foodIntolerances, error: intolerancesError } = await supabase
-        .from("food_intolerances")
-        .select("intolerance")
-        .eq("profile_id", user.id);
-
-      if (intolerancesError) throw intolerancesError;
-
-      const { data: dietStyles, error: dietStylesError } = await supabase
-        .from("user_diet_styles")
-        .select("diet_style")
-        .eq("profile_id", user.id);
-
-      if (dietStylesError) throw dietStylesError;
-
-      setPreferences(prev => ({
-        ...prev,
-        dietaryOption: dietStyles?.[0]?.diet_style || "classic",
-        allergies: foodIntolerances?.map(i => i.intolerance).join(', ') || "",
-        medicalCondition: profile?.diabetes_type || "type2",
-      }));
+      if (error) throw error;
+      setIsSubscribed(data?.subscribed || false);
     } catch (error) {
-      console.error("Error fetching preferences:", error);
-      toast.error("Failed to load preferences");
+      console.error('Error checking subscription:', error);
     }
   };
 
   const generateRecipe = async () => {
-    // Prevent multiple simultaneous generations
     if (loading || isGenerating) {
       console.log("Generation already in progress");
       return;
@@ -88,6 +49,11 @@ export default function RecipeGenerator() {
 
     if (!user && generationsLeft <= 0) {
       toast.error("You've used all your free generations. Please sign up to continue!");
+      return;
+    }
+
+    if (!isSubscribed && user) {
+      toast.error("Please subscribe to generate more recipes!");
       return;
     }
 
@@ -135,7 +101,7 @@ export default function RecipeGenerator() {
         onGenerate={generateRecipe}
       />
 
-      {!user && generationsLeft === 0 && <SignUpPrompt />}
+      {(!user && generationsLeft === 0) || (user && !isSubscribed) ? <SignUpPrompt /> : null}
       {recipe && <RecipeDisplay recipe={recipe} />}
     </div>
   );
