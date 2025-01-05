@@ -5,7 +5,7 @@ import { GeneratorHeader } from "@/components/recipe-generator/GeneratorHeader";
 import { SignUpPrompt } from "@/components/recipe-generator/SignUpPrompt";
 import { RecipeDisplay } from "@/components/recipe-generator/RecipeDisplay";
 import { generateRecipeFromDatabase, type RecipePreferences } from "@/components/recipe-generator/RecipeGeneratorLogic";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 
 export default function RecipeGenerator() {
   const { user } = useAuth();
