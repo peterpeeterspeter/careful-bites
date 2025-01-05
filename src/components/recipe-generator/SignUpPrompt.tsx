@@ -14,6 +14,7 @@ export function SignUpPrompt() {
     }
 
     try {
+      toast.loading('Preparing checkout...');
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         method: 'POST',
       });
@@ -21,10 +22,12 @@ export function SignUpPrompt() {
       if (error) throw error;
       if (data?.url) {
         window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
       }
     } catch (error) {
       console.error('Error creating checkout session:', error);
-      toast.error(error.message || 'Failed to start checkout process');
+      toast.error('Failed to start checkout process. Please try again.');
     }
   };
 
