@@ -1,6 +1,13 @@
 import { SparklesIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { MedicalConditionField } from "./preferences/MedicalConditionField";
 import { BloodSugarRangeField } from "./preferences/BloodSugarRangeField";
 import { DietaryPreferencesField } from "./preferences/DietaryPreferencesField";
