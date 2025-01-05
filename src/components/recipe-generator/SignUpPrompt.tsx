@@ -17,27 +17,34 @@ export function SignUpPrompt() {
 
     if (isLoading) return;
 
-    setIsLoading(true);
-    const loadingToast = toast.loading('Preparing checkout...');
-
     try {
+      setIsLoading(true);
+      const loadingToast = toast.loading('Preparing checkout...');
+
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         method: 'POST',
       });
 
-      if (error) throw error;
+      if (error) {
+        toast.dismiss(loadingToast);
+        setIsLoading(false);
+        toast.error('Failed to start checkout process: ' + error.message);
+        return;
+      }
       
       if (!data?.url) {
-        throw new Error('No checkout URL received');
+        toast.dismiss(loadingToast);
+        setIsLoading(false);
+        toast.error('No checkout URL received. Please try again.');
+        return;
       }
 
       toast.dismiss(loadingToast);
       window.location.href = data.url;
     } catch (error) {
       console.error('Error creating checkout session:', error);
-      toast.dismiss(loadingToast);
-      toast.error('Failed to start checkout process. Please try again.');
       setIsLoading(false);
+      toast.error('Failed to start checkout process. Please try again.');
     }
   };
 
