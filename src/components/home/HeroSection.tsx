@@ -104,10 +104,10 @@ export function HeroSection() {
                       key={option.value}
                       value={option.value}
                       aria-label={option.label}
-                      className="flex flex-col items-center justify-center p-4 gap-2 data-[state=on]:bg-primary/10 hover:bg-secondary/5 transition-colors"
+                      className="flex flex-col items-center justify-center p-4 rounded-lg border border-gray-100 shadow-sm hover:bg-primary-50 data-[state=on]:bg-primary-100 data-[state=on]:border-primary-200 transition-all duration-200"
                     >
-                      <span className="font-medium">{option.label}</span>
-                      <span className="text-xs text-muted-foreground text-center">
+                      <span className="font-medium text-gray-800">{option.label}</span>
+                      <span className="text-xs text-gray-500 text-center mt-1">
                         {option.description}
                       </span>
                     </ToggleGroupItem>
