@@ -57,21 +57,32 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
       return null;
     }
 
-    // Parse and validate the data from Supabase
     const recipes: RecipeSource[] = recipesData.map(recipe => {
       // Parse ingredients
-      const ingredients = Array.isArray(recipe.ingredients) 
-        ? recipe.ingredients 
-        : typeof recipe.ingredients === 'string'
-          ? JSON.parse(recipe.ingredients)
-          : [];
+      let parsedIngredients: string[];
+      try {
+        parsedIngredients = Array.isArray(recipe.ingredients) 
+          ? recipe.ingredients 
+          : typeof recipe.ingredients === 'string'
+            ? JSON.parse(recipe.ingredients)
+            : [];
+      } catch (e) {
+        console.error('Error parsing ingredients:', e);
+        parsedIngredients = [];
+      }
 
       // Parse instructions
-      const instructions = Array.isArray(recipe.instructions)
-        ? recipe.instructions
-        : typeof recipe.instructions === 'string'
-          ? JSON.parse(recipe.instructions)
-          : [];
+      let parsedInstructions: string[];
+      try {
+        parsedInstructions = Array.isArray(recipe.instructions)
+          ? recipe.instructions
+          : typeof recipe.instructions === 'string'
+            ? JSON.parse(recipe.instructions)
+            : [];
+      } catch (e) {
+        console.error('Error parsing instructions:', e);
+        parsedInstructions = [];
+      }
 
       // Parse and validate nutritional info
       let nutritionalInfo;
@@ -95,8 +106,8 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
       return {
         title: recipe.title,
         description: recipe.description,
-        ingredients,
-        instructions,
+        ingredients: parsedIngredients,
+        instructions: parsedInstructions,
         nutritional_info: validatedNutritionalInfo,
         glycemic_index: recipe.glycemic_index,
         glycemic_load: recipe.glycemic_load,
