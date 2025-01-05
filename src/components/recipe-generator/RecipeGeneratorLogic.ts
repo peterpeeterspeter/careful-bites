@@ -28,26 +28,18 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
   console.log('Generating recipe with preferences:', preferences);
 
   try {
-    let query = supabase
+    // Build the query with proper error handling
+    const { data: recipesData, error } = await supabase
       .from('recipe_sources')
       .select('*')
-      .eq('diabetes_friendly', true);
-
-    // Apply filters based on preferences
-    if (preferences.cuisine) {
-      query = query.eq('cuisine_type', preferences.cuisine.toLowerCase());
-    }
-
-    if (preferences.dietaryOption && preferences.dietaryOption !== 'classic') {
-      query = query.contains('tags', [preferences.dietaryOption.toLowerCase()]);
-    }
-
-    // Fetch recipes
-    const { data: recipesData, error } = await query;
+      .eq('diabetes_friendly', true)
+      .eq(preferences.cuisine ? 'cuisine_type' : '', preferences.cuisine?.toLowerCase() || '')
+      .contains(preferences.dietaryOption && preferences.dietaryOption !== 'classic' ? 'tags' : '', 
+                preferences.dietaryOption ? [preferences.dietaryOption.toLowerCase()] : []);
 
     if (error) {
       console.error('Error fetching recipes:', error);
-      throw error;
+      throw new Error(`Failed to fetch recipes: ${error.message}`);
     }
 
     if (!recipesData?.length) {
@@ -110,7 +102,6 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
 
     console.log(`Found ${validRecipes.length} valid recipes after processing`);
 
-    // Select a random recipe from the valid ones
     const randomIndex = Math.floor(Math.random() * validRecipes.length);
     const selectedRecipe = validRecipes[randomIndex];
 
