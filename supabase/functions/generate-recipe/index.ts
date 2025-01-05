@@ -21,34 +21,19 @@ serve(async (req) => {
     console.log('Generating recipe with preferences:', preferences);
     console.log('Is anonymous user:', isAnonymous);
 
-    const openRouterKey = Deno.env.get('OPENAI_API_KEY');
+    const openAiKey = Deno.env.get('OPENAI_API_KEY');
     const replicateApiKey = Deno.env.get('REPLICATE_API_KEY');
     
-    if (!openRouterKey) {
-      throw new Error('OpenRouter API key not configured');
+    if (!openAiKey) {
+      throw new Error('OpenAI API key not configured');
     }
 
     if (!replicateApiKey) {
       throw new Error('Replicate API key not configured');
     }
 
-    // Build the prompt for recipe generation
-    const dietaryRestrictionsStr = preferences.dietaryRestrictions?.length > 0 
-      ? `Dietary Restrictions: ${preferences.dietaryRestrictions.join(', ')}`
-      : 'No specific dietary restrictions';
-
-    const foodIntolerancesStr = preferences.foodIntolerances?.length > 0
-      ? `Food Intolerances: ${preferences.foodIntolerances.join(', ')}`
-      : 'No specific food intolerances';
-
-    const dietStylesStr = preferences.dietStyles?.length > 0
-      ? `Diet Styles: ${preferences.dietStyles.join(', ')}`
-      : 'No specific diet styles';
-
-    const prompt = `Generate a detailed recipe that meets these specific dietary requirements...`;
-    
     // Generate recipe
-    const recipe = await generateRecipeWithOpenAI(prompt, openRouterKey);
+    const recipe = await generateRecipeWithOpenAI(preferences, openAiKey);
     
     // Generate image for the recipe
     const imageUrl = await generateRecipeImage(

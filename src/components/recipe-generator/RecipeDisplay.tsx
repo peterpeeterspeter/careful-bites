@@ -24,6 +24,7 @@ interface Recipe {
   glycemicIndex?: number;
   glycemicLoad?: number;
   glucoseImpact?: string;
+  image_url?: string;
 }
 
 interface RecipeDisplayProps {
@@ -35,6 +36,17 @@ export function RecipeDisplay({ recipe }: RecipeDisplayProps) {
     <div className="space-y-6">
       <div>
         <h1 className="text-4xl font-bold text-gray-900 mb-4">{recipe.title}</h1>
+        
+        {recipe.image_url && (
+          <div className="mb-6 rounded-lg overflow-hidden">
+            <img 
+              src={recipe.image_url} 
+              alt={recipe.title}
+              className="w-full h-[400px] object-cover"
+            />
+          </div>
+        )}
+
         <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
           <div className="flex items-center gap-1">
             <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
