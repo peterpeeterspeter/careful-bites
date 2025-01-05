@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,13 +13,13 @@ export default function RecipeGenerator() {
   const [generationsLeft, setGenerationsLeft] = useState(3);
   const [preferences, setPreferences] = useState({
     diabetesType: "type2",
-    dietaryRestrictions: [] as string[],
-    foodIntolerances: [] as string[],
-    dietStyles: [] as string[],
+    dietaryRestrictions: [],
+    foodIntolerances: [],
+    dietStyles: [],
   });
 
+  // Load stored generations count and preferences
   useEffect(() => {
-    // Load stored generations count
     const storedGenerations = localStorage.getItem('freeGenerationsLeft');
     if (storedGenerations === null) {
       localStorage.setItem('freeGenerationsLeft', '3');
@@ -27,11 +27,10 @@ export default function RecipeGenerator() {
       setGenerationsLeft(parseInt(storedGenerations));
     }
 
-    // Only fetch preferences if user is authenticated
     if (user) {
       fetchUserPreferences();
     }
-  }, [user]); // Only run when user changes
+  }, [user]);
 
   const fetchUserPreferences = async () => {
     try {
@@ -79,14 +78,12 @@ export default function RecipeGenerator() {
     }
   };
 
-  const generateRecipe = async () => {
-    // Prevent multiple generations if already loading
+  const generateRecipe = useCallback(async () => {
     if (loading) {
       console.log("Generation already in progress");
       return;
     }
 
-    // Check if user has generations left
     if (!user && generationsLeft <= 0) {
       toast.error("You've used all your free generations. Please sign up to continue!");
       return;
@@ -106,11 +103,8 @@ export default function RecipeGenerator() {
       if (error) throw error;
 
       console.log("Recipe generation successful:", data);
-      
-      // Only update recipe if component is still mounted and generation wasn't cancelled
       setRecipe(data.recipe);
       
-      // Update free generations count for anonymous users
       if (!user) {
         const newGenerationsLeft = generationsLeft - 1;
         localStorage.setItem('freeGenerationsLeft', newGenerationsLeft.toString());
@@ -130,7 +124,7 @@ export default function RecipeGenerator() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [loading, user, generationsLeft, preferences]);
 
   return (
     <div className="container mx-auto py-6 space-y-6">
