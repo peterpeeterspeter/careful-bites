@@ -104,36 +104,39 @@ export const useProfileSetup = () => {
     setIsSubmitting(true);
 
     try {
+      // Prepare the profile data, handling null values for dates
+      const profileData = {
+        diabetes_type: formData.diabetes_type as DiabetesType,
+        diagnosis_date: formData.diagnosis_date || null,
+        last_hba1c: formData.last_hba1c ? parseFloat(formData.last_hba1c) : null,
+        preferred_glucose_unit: formData.preferred_glucose_unit,
+        insulin_therapy: formData.insulin_therapy,
+        insulin_pump_user: formData.insulin_pump_user,
+        cgm_user: formData.cgm_user,
+        preferred_meal_times: formData.preferred_meal_times,
+        age: formData.age ? parseInt(formData.age) : null,
+        height_cm: formData.height_cm ? parseInt(formData.height_cm) : null,
+        current_weight_kg: formData.current_weight_kg ? parseFloat(formData.current_weight_kg) : null,
+        target_weight_kg: formData.target_weight_kg ? parseFloat(formData.target_weight_kg) : null,
+        weight_goal_date: formData.weight_goal_date || null,
+        gender: formData.gender as Gender,
+        activity_level: formData.activity_level as ActivityLevel,
+        daily_calorie_target: formData.daily_calorie_target ? parseInt(formData.daily_calorie_target) : null,
+        budget_preference: formData.budget_preference || null,
+        family_size: formData.family_size ? parseInt(formData.family_size) : null,
+        insulin_regimen: formData.insulin_regimen || null,
+        glucose_monitor_device: formData.glucose_monitor_device || null,
+        cooking_skill_level: formData.cooking_skill_level || null,
+        available_cooking_time: formData.available_cooking_time || null,
+        meal_prep_preference: formData.meal_prep_preference || null,
+        grocery_frequency: formData.grocery_frequency || null,
+        dietary_restrictions: formData.dietary_restrictions,
+      };
+
       // Update profile
       const { error: profileError } = await supabase
         .from("profiles")
-        .update({
-          diabetes_type: formData.diabetes_type as DiabetesType,
-          diagnosis_date: formData.diagnosis_date,
-          last_hba1c: parseFloat(formData.last_hba1c),
-          preferred_glucose_unit: formData.preferred_glucose_unit,
-          insulin_therapy: formData.insulin_therapy,
-          insulin_pump_user: formData.insulin_pump_user,
-          cgm_user: formData.cgm_user,
-          preferred_meal_times: formData.preferred_meal_times,
-          age: parseInt(formData.age),
-          height_cm: parseInt(formData.height_cm),
-          current_weight_kg: parseFloat(formData.current_weight_kg),
-          target_weight_kg: parseFloat(formData.target_weight_kg),
-          weight_goal_date: formData.weight_goal_date,
-          gender: formData.gender as Gender,
-          activity_level: formData.activity_level as ActivityLevel,
-          daily_calorie_target: parseInt(formData.daily_calorie_target),
-          budget_preference: formData.budget_preference,
-          family_size: parseInt(formData.family_size),
-          insulin_regimen: formData.insulin_regimen,
-          glucose_monitor_device: formData.glucose_monitor_device,
-          cooking_skill_level: formData.cooking_skill_level,
-          available_cooking_time: formData.available_cooking_time,
-          meal_prep_preference: formData.meal_prep_preference,
-          grocery_frequency: formData.grocery_frequency,
-          dietary_restrictions: formData.dietary_restrictions,
-        })
+        .update(profileData)
         .eq("id", user.id);
 
       if (profileError) throw profileError;
