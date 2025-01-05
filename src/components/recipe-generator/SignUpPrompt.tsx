@@ -20,8 +20,8 @@ export function SignUpPrompt() {
 
     if (isLoading) return;
 
-    setIsLoading(true);
     const toastId = 'checkout-process';
+    setIsLoading(true);
 
     try {
       toast.loading('Preparing checkout...', { id: toastId });
@@ -34,6 +34,7 @@ export function SignUpPrompt() {
       if (!data?.url) throw new Error('No checkout URL received');
 
       toast.dismiss(toastId);
+      // Use window.location.href for navigation to external URLs
       window.location.href = data.url;
     } catch (error) {
       console.error('Error creating checkout session:', error);
