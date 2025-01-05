@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -78,7 +78,7 @@ export default function RecipeGenerator() {
     }
   };
 
-  const generateRecipe = useCallback(async () => {
+  const generateRecipe = async () => {
     if (loading) {
       console.log("Generation already in progress");
       return;
@@ -124,7 +124,7 @@ export default function RecipeGenerator() {
     } finally {
       setLoading(false);
     }
-  }, [loading, user, generationsLeft, preferences]);
+  };
 
   return (
     <div className="container mx-auto py-6 space-y-6">
