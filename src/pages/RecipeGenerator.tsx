@@ -34,12 +34,14 @@ export default function RecipeGenerator() {
   }, [user]);
 
   const fetchUserPreferences = async () => {
+    if (!user?.id) return;
+
     try {
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("diabetes_type, dietary_restrictions")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
       if (profileError) throw profileError;
 
@@ -64,13 +66,12 @@ export default function RecipeGenerator() {
 
       if (dietStylesError) throw dietStylesError;
 
-      setPreferences({
+      setPreferences(prev => ({
+        ...prev,
         dietaryOption: dietStyles?.[0]?.diet_style || "classic",
         allergies: foodIntolerances?.[0]?.intolerance || "",
-        dislikes: "",
         medicalCondition: profile?.diabetes_type || "type2",
-        cuisine: ""
-      });
+      }));
     } catch (error) {
       console.error("Error fetching preferences:", error);
       toast.error("Failed to load preferences");
@@ -98,7 +99,6 @@ export default function RecipeGenerator() {
         throw new Error("No suitable recipe found");
       }
 
-      console.log("Recipe generation successful:", generatedRecipe);
       setRecipe(generatedRecipe);
       
       if (!user) {

@@ -27,8 +27,6 @@ interface RecipeSource {
 
 export const generateRecipeFromDatabase = async (preferences: RecipePreferences) => {
   try {
-    console.log('Starting recipe generation with preferences:', preferences);
-    
     let query = supabase
       .from('recipe_sources')
       .select('*')
@@ -47,13 +45,11 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
 
     if (error) {
       console.error('Error fetching recipes:', error);
-      toast.error('Failed to fetch recipes. Please try again.');
       throw error;
     }
 
     if (!recipesData?.length) {
       console.log('No recipes found matching the criteria');
-      toast.error('No recipes found matching your preferences. Try adjusting your filters.');
       return null;
     }
 
@@ -61,34 +57,31 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
     const validRecipes = recipesData
       .map(recipe => {
         try {
-          // Ensure ingredients is an array of strings
           const ingredients = Array.isArray(recipe.ingredients) 
             ? recipe.ingredients 
             : typeof recipe.ingredients === 'string'
               ? JSON.parse(recipe.ingredients)
               : [];
 
-          // Ensure instructions is an array of strings
           const instructions = Array.isArray(recipe.instructions)
             ? recipe.instructions
             : typeof recipe.instructions === 'string'
               ? JSON.parse(recipe.instructions)
               : [];
 
-          // Validate nutritional info
           const nutritionalInfo = typeof recipe.nutritional_info === 'string'
             ? JSON.parse(recipe.nutritional_info)
             : recipe.nutritional_info;
 
           if (!nutritionalInfo || typeof nutritionalInfo !== 'object') {
-            throw new Error('Invalid nutritional info format');
+            return null;
           }
 
           return {
             title: recipe.title,
             description: recipe.description,
-            ingredients: ingredients,
-            instructions: instructions,
+            ingredients,
+            instructions,
             nutritional_info: {
               calories: Number(nutritionalInfo.calories) || 0,
               carbs: Number(nutritionalInfo.carbs) || 0,
@@ -107,11 +100,9 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
       .filter((recipe): recipe is RecipeSource => recipe !== null);
 
     if (validRecipes.length === 0) {
-      toast.error('No valid recipes found. Please try again.');
       return null;
     }
 
-    // Select a random recipe from valid ones
     const randomIndex = Math.floor(Math.random() * validRecipes.length);
     const selectedRecipe = validRecipes[randomIndex];
 
@@ -121,8 +112,8 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
       ingredients: selectedRecipe.ingredients,
       instructions: selectedRecipe.instructions,
       nutritionalInfo: selectedRecipe.nutritional_info,
-      preparationTime: 30, // Default value
-      cookingTime: 30, // Default value
+      preparationTime: 30,
+      cookingTime: 30,
       difficultyLevel: 'Medium',
       glycemicIndex: selectedRecipe.glycemic_index,
       glycemicLoad: selectedRecipe.glycemic_load,
@@ -130,7 +121,6 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
     };
   } catch (error) {
     console.error('Error generating recipe:', error);
-    toast.error('Failed to generate recipe. Please try again.');
     throw error;
   }
 };
