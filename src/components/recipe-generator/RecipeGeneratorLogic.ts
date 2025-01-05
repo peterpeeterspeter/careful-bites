@@ -28,7 +28,6 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
   console.log('Generating recipe with preferences:', preferences);
 
   try {
-    // Build the query with proper error handling
     const { data: recipesData, error } = await supabase
       .from('recipe_sources')
       .select('*')

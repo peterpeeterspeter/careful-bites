@@ -40,6 +40,9 @@ export default function RecipeGenerator() {
     try {
       const { data, error } = await supabase.functions.invoke('check-subscription', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       if (!mounted.current) return;
