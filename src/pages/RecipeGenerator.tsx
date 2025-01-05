@@ -38,11 +38,19 @@ export default function RecipeGenerator() {
     if (!mounted.current) return;
 
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+
+      if (!accessToken) {
+        console.error('No access token available');
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('check-subscription', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.auth.getSession()?.access_token}`
+          'Authorization': `Bearer ${accessToken}`
         },
       });
 
