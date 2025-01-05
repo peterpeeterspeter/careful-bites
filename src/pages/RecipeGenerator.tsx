@@ -21,6 +21,15 @@ export default function RecipeGenerator() {
     cuisine: ""
   });
 
+  // Add mounted ref to prevent state updates after unmount
+  const mounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
   useEffect(() => {
     if (user) {
       checkSubscription();
@@ -28,22 +37,28 @@ export default function RecipeGenerator() {
   }, [user]);
 
   const checkSubscription = async () => {
+    if (!mounted.current) return;
+
     try {
       const { data, error } = await supabase.functions.invoke('check-subscription', {
         method: 'POST',
       });
 
+      if (!mounted.current) return;
+
       if (error) throw error;
       setIsSubscribed(data?.subscribed || false);
     } catch (error) {
       console.error('Error checking subscription:', error);
-      toast.error('Failed to check subscription status');
+      if (mounted.current) {
+        toast.error('Failed to check subscription status');
+      }
     }
   };
 
   const generateRecipe = async () => {
-    if (loading) {
-      console.log("Generation already in progress");
+    if (loading || !mounted.current) {
+      console.log("Generation already in progress or component unmounted");
       return;
     }
 
@@ -62,6 +77,8 @@ export default function RecipeGenerator() {
       console.log('Starting recipe generation with preferences:', preferences);
       
       const generatedRecipe = await generateRecipeFromDatabase(preferences);
+
+      if (!mounted.current) return;
 
       if (!generatedRecipe) {
         toast.error("No suitable recipe found. Please try adjusting your preferences.");
@@ -84,10 +101,13 @@ export default function RecipeGenerator() {
         toast.success("Recipe generated successfully!");
       }
     } catch (error) {
+      if (!mounted.current) return;
       console.error("Error generating recipe:", error);
       toast.error("Failed to generate recipe. Please try again.");
     } finally {
-      setLoading(false);
+      if (mounted.current) {
+        setLoading(false);
+      }
     }
   };
 
