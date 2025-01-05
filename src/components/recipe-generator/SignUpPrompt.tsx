@@ -17,15 +17,17 @@ export function SignUpPrompt() {
 
     if (isLoading) return;
 
+    let loadingToast;
     try {
       setIsLoading(true);
-      const loadingToast = toast.loading('Preparing checkout...');
+      loadingToast = toast.loading('Preparing checkout...');
 
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         method: 'POST',
       });
 
       if (error) {
+        console.error('Supabase function error:', error);
         toast.dismiss(loadingToast);
         setIsLoading(false);
         toast.error('Failed to start checkout process: ' + error.message);
@@ -33,18 +35,24 @@ export function SignUpPrompt() {
       }
       
       if (!data?.url) {
+        console.error('No checkout URL received');
         toast.dismiss(loadingToast);
         setIsLoading(false);
         toast.error('No checkout URL received. Please try again.');
         return;
       }
 
+      // Only redirect if we have a valid URL
       toast.dismiss(loadingToast);
       window.location.href = data.url;
     } catch (error) {
       console.error('Error creating checkout session:', error);
+      if (loadingToast) toast.dismiss(loadingToast);
       setIsLoading(false);
       toast.error('Failed to start checkout process. Please try again.');
+    } finally {
+      // Ensure loading state is reset if something unexpected happens
+      setIsLoading(false);
     }
   };
 
