@@ -443,6 +443,54 @@ export type Database = {
         }
         Relationships: []
       }
+      recipe_sources: {
+        Row: {
+          created_at: string
+          cuisine_type: string | null
+          description: string | null
+          diabetes_friendly: boolean | null
+          glycemic_index: number | null
+          glycemic_load: number | null
+          id: string
+          ingredients: Json
+          instructions: string[]
+          meal_type: string | null
+          nutritional_info: Json
+          source: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          cuisine_type?: string | null
+          description?: string | null
+          diabetes_friendly?: boolean | null
+          glycemic_index?: number | null
+          glycemic_load?: number | null
+          id?: string
+          ingredients: Json
+          instructions: string[]
+          meal_type?: string | null
+          nutritional_info: Json
+          source: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          cuisine_type?: string | null
+          description?: string | null
+          diabetes_friendly?: boolean | null
+          glycemic_index?: number | null
+          glycemic_load?: number | null
+          id?: string
+          ingredients?: Json
+          instructions?: string[]
+          meal_type?: string | null
+          nutritional_info?: Json
+          source?: string
+          title?: string
+        }
+        Relationships: []
+      }
       recipes: {
         Row: {
           calories_per_serving: number | null

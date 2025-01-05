@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { GeneratorHeader } from "@/components/recipe-generator/GeneratorHeader";
 import { SignUpPrompt } from "@/components/recipe-generator/SignUpPrompt";
 import { RecipeDisplay } from "@/components/recipe-generator/RecipeDisplay";
+import { generateRecipeFromDatabase } from "@/components/recipe-generator/RecipeGeneratorLogic";
 
 export default function RecipeGenerator() {
   const { user } = useAuth();
@@ -18,7 +18,6 @@ export default function RecipeGenerator() {
     dietStyles: [],
   });
 
-  // Load stored generations count and preferences
   useEffect(() => {
     const storedGenerations = localStorage.getItem('freeGenerationsLeft');
     if (storedGenerations === null) {
@@ -79,13 +78,11 @@ export default function RecipeGenerator() {
   };
 
   const generateRecipe = async () => {
-    // Prevent multiple generations
     if (loading) {
       console.log("Generation already in progress");
       return;
     }
 
-    // Check for remaining generations
     if (!user && generationsLeft <= 0) {
       toast.error("You've used all your free generations. Please sign up to continue!");
       return;
@@ -95,20 +92,15 @@ export default function RecipeGenerator() {
     console.log("Starting recipe generation with preferences:", preferences);
 
     try {
-      const { data, error } = await supabase.functions.invoke('generate-recipe', {
-        body: {
-          preferences,
-          profile_id: user?.id,
-          isAnonymous: !user
-        },
-      });
+      const generatedRecipe = await generateRecipeFromDatabase(preferences);
 
-      if (error) throw error;
+      if (!generatedRecipe) {
+        throw new Error("No suitable recipe found");
+      }
 
-      console.log("Recipe generation successful:", data);
-      setRecipe(data.recipe);
+      console.log("Recipe generation successful:", generatedRecipe);
+      setRecipe(generatedRecipe);
       
-      // Update free generations count for anonymous users
       if (!user) {
         const newGenerationsLeft = generationsLeft - 1;
         localStorage.setItem('freeGenerationsLeft', newGenerationsLeft.toString());
@@ -125,8 +117,6 @@ export default function RecipeGenerator() {
     } catch (error) {
       console.error("Error generating recipe:", error);
       toast.error("Failed to generate recipe. Please try again.");
-      // Reset loading state on error
-      setLoading(false);
     } finally {
       setLoading(false);
     }
