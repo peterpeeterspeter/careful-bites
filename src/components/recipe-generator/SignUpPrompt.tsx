@@ -3,13 +3,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 export function SignUpPrompt() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubscribe = async () => {
+  const handleSubscribe = useCallback(async () => {
     if (!user) {
       window.location.href = '/register';
       return;
@@ -18,8 +18,9 @@ export function SignUpPrompt() {
     if (isLoading) return;
 
     let loadingToast;
+    setIsLoading(true);
+
     try {
-      setIsLoading(true);
       loadingToast = toast.loading('Preparing checkout...');
 
       const { data, error } = await supabase.functions.invoke('create-checkout', {
@@ -28,33 +29,25 @@ export function SignUpPrompt() {
 
       if (error) {
         console.error('Supabase function error:', error);
-        toast.dismiss(loadingToast);
-        setIsLoading(false);
-        toast.error('Failed to start checkout process: ' + error.message);
-        return;
+        throw new Error(error.message);
       }
       
       if (!data?.url) {
         console.error('No checkout URL received');
-        toast.dismiss(loadingToast);
-        setIsLoading(false);
-        toast.error('No checkout URL received. Please try again.');
-        return;
+        throw new Error('No checkout URL received');
       }
 
-      // Only redirect if we have a valid URL
-      toast.dismiss(loadingToast);
       window.location.href = data.url;
     } catch (error) {
       console.error('Error creating checkout session:', error);
-      if (loadingToast) toast.dismiss(loadingToast);
-      setIsLoading(false);
       toast.error('Failed to start checkout process. Please try again.');
     } finally {
-      // Ensure loading state is reset if something unexpected happens
+      if (loadingToast) {
+        toast.dismiss(loadingToast);
+      }
       setIsLoading(false);
     }
-  };
+  }, [user, isLoading]);
 
   return (
     <Card className="bg-green-50 border-green-200">
