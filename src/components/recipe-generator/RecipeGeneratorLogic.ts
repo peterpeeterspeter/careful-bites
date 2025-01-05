@@ -123,4 +123,4 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
     console.error('Error generating recipe:', error);
     throw error;
   }
-};
+}

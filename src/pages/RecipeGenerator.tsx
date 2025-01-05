@@ -42,12 +42,18 @@ export default function RecipeGenerator() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabase.auth.getSession()?.access_token}`
         },
       });
 
       if (!mounted.current) return;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Subscription check error:', error);
+        toast.error('Failed to check subscription status');
+        return;
+      }
+
       setIsSubscribed(data?.subscribed || false);
     } catch (error) {
       console.error('Error checking subscription:', error);
@@ -102,7 +108,6 @@ export default function RecipeGenerator() {
         toast.success("Recipe generated successfully!");
       }
     } catch (error) {
-      if (!mounted.current) return;
       console.error("Error generating recipe:", error);
       toast.error("Failed to generate recipe. Please try again.");
     } finally {
