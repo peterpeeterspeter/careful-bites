@@ -58,7 +58,7 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
     }
 
     // Parse and validate the data from Supabase
-    const recipes = recipesData.map(recipe => {
+    const recipes: RecipeSource[] = recipesData.map(recipe => {
       // Parse ingredients
       const ingredients = Array.isArray(recipe.ingredients) 
         ? recipe.ingredients 
@@ -74,11 +74,17 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
           : [];
 
       // Parse and validate nutritional info
-      const nutritionalInfo = typeof recipe.nutritional_info === 'string'
-        ? JSON.parse(recipe.nutritional_info)
-        : recipe.nutritional_info;
+      let nutritionalInfo;
+      try {
+        nutritionalInfo = typeof recipe.nutritional_info === 'string'
+          ? JSON.parse(recipe.nutritional_info)
+          : recipe.nutritional_info;
+      } catch (e) {
+        console.error('Error parsing nutritional info:', e);
+        nutritionalInfo = { calories: 0, carbs: 0, protein: 0, fat: 0 };
+      }
 
-      // Ensure nutritional info has all required fields
+      // Ensure nutritional info has all required fields with proper number types
       const validatedNutritionalInfo = {
         calories: Number(nutritionalInfo?.calories) || 0,
         carbs: Number(nutritionalInfo?.carbs) || 0,
@@ -87,11 +93,15 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
       };
 
       return {
-        ...recipe,
+        title: recipe.title,
+        description: recipe.description,
         ingredients,
         instructions,
-        nutritional_info: validatedNutritionalInfo
-      } as RecipeSource;
+        nutritional_info: validatedNutritionalInfo,
+        glycemic_index: recipe.glycemic_index,
+        glycemic_load: recipe.glycemic_load,
+        cuisine_type: recipe.cuisine_type
+      };
     });
 
     // Filter out recipes with allergens if specified
@@ -127,7 +137,7 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
       difficultyLevel: 'Medium',
       glycemicIndex: selectedRecipe.glycemic_index,
       glycemicLoad: selectedRecipe.glycemic_load,
-      glucoseImpact: selectedRecipe.glycemic_load < 10 ? 'Low' : 'Moderate',
+      glucoseImpact: selectedRecipe.glycemic_load && selectedRecipe.glycemic_load < 10 ? 'Low' : 'Moderate',
     };
   } catch (error) {
     console.error('Error generating recipe:', error);
