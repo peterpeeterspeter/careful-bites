@@ -12,7 +12,6 @@ export default function RecipeGenerator() {
   const [loading, setLoading] = useState(false);
   const [recipe, setRecipe] = useState(null);
   const [generationsLeft, setGenerationsLeft] = useState(3);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [preferences, setPreferences] = useState<RecipePreferences>({
     dietaryOption: "classic",
@@ -38,11 +37,12 @@ export default function RecipeGenerator() {
       setIsSubscribed(data?.subscribed || false);
     } catch (error) {
       console.error('Error checking subscription:', error);
+      toast.error('Failed to check subscription status');
     }
   };
 
   const generateRecipe = async () => {
-    if (loading || isGenerating) {
+    if (loading) {
       console.log("Generation already in progress");
       return;
     }
@@ -58,13 +58,13 @@ export default function RecipeGenerator() {
     }
 
     setLoading(true);
-    setIsGenerating(true);
 
     try {
       const generatedRecipe = await generateRecipeFromDatabase(preferences);
 
       if (!generatedRecipe) {
         toast.error("No suitable recipe found. Please try adjusting your preferences.");
+        setLoading(false);
         return;
       }
 
@@ -88,7 +88,6 @@ export default function RecipeGenerator() {
       toast.error("Failed to generate recipe. Please try again.");
     } finally {
       setLoading(false);
-      setIsGenerating(false);
     }
   };
 
