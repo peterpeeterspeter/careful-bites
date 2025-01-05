@@ -12,9 +12,14 @@ export interface RecipePreferences {
 interface RecipeSource {
   title: string;
   description: string | null;
-  ingredients: string[];  // Now properly typed as string array
+  ingredients: string[];
   instructions: string[];
-  nutritional_info: Record<string, any>;
+  nutritional_info: {
+    calories: number;
+    carbs: number;
+    protein: number;
+    fat: number;
+  };
   glycemic_index: number | null;
   glycemic_load: number | null;
   cuisine_type: string | null;
@@ -28,7 +33,7 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
       .from('recipe_sources')
       .select('*')
       .eq('diabetes_friendly', true)
-      .limit(50); // Limit the number of recipes to process
+      .limit(50);
 
     if (preferences.cuisine) {
       query = query.eq('cuisine_type', preferences.cuisine.toLowerCase());
@@ -52,19 +57,26 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
       return null;
     }
 
-    // Cast the data to our RecipeSource type
-    const recipes = recipesData as RecipeSource[];
+    // Parse the JSON data into properly typed recipe objects
+    const recipes = recipesData.map(recipe => ({
+      ...recipe,
+      ingredients: Array.isArray(recipe.ingredients) 
+        ? recipe.ingredients 
+        : typeof recipe.ingredients === 'string'
+          ? JSON.parse(recipe.ingredients)
+          : [],
+      instructions: Array.isArray(recipe.instructions)
+        ? recipe.instructions
+        : typeof recipe.instructions === 'string'
+          ? JSON.parse(recipe.instructions)
+          : []
+    })) as RecipeSource[];
 
     // Filter out recipes with allergens if specified
     let filteredRecipes = recipes;
     if (preferences.allergies) {
       filteredRecipes = recipes.filter(recipe => {
-        // Ensure ingredients is treated as an array
-        const ingredientsArray = Array.isArray(recipe.ingredients) 
-          ? recipe.ingredients 
-          : [];
-        
-        return !ingredientsArray.some(ingredient => 
+        return !recipe.ingredients.some(ingredient => 
           ingredient.toLowerCase().includes(preferences.allergies.toLowerCase())
         );
       });
@@ -82,16 +94,11 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
 
     console.log('Selected recipe:', selectedRecipe);
 
-    // Transform to match the expected recipe format
     return {
       title: selectedRecipe.title,
       description: selectedRecipe.description || '',
-      ingredients: Array.isArray(selectedRecipe.ingredients) 
-        ? selectedRecipe.ingredients 
-        : [],
-      instructions: Array.isArray(selectedRecipe.instructions) 
-        ? selectedRecipe.instructions 
-        : [],
+      ingredients: selectedRecipe.ingredients,
+      instructions: selectedRecipe.instructions,
       nutritionalInfo: selectedRecipe.nutritional_info,
       preparationTime: 30, // Default value
       cookingTime: 30, // Default value
