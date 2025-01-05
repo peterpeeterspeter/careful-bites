@@ -31,13 +31,7 @@ export default function RecipeGenerator() {
     if (user) {
       fetchUserPreferences();
     }
-
-    // Cleanup function to prevent memory leaks
-    return () => {
-      setLoading(false);
-      setRecipe(null);
-    };
-  }, [user]);
+  }, [user]); // Only run when user changes
 
   const fetchUserPreferences = async () => {
     try {
@@ -86,7 +80,10 @@ export default function RecipeGenerator() {
   };
 
   const generateRecipe = async () => {
-    if (loading) return; // Prevent multiple simultaneous generations
+    if (loading) {
+      console.log("Generation already in progress");
+      return; // Prevent multiple simultaneous generations
+    }
 
     if (!user && generationsLeft <= 0) {
       toast.error("You've used all your free generations. Please sign up to continue!");
@@ -95,6 +92,7 @@ export default function RecipeGenerator() {
 
     setLoading(true);
     try {
+      console.log("Starting recipe generation with preferences:", preferences);
       const { data, error } = await supabase.functions.invoke('generate-recipe', {
         body: {
           preferences,
@@ -105,6 +103,7 @@ export default function RecipeGenerator() {
 
       if (error) throw error;
 
+      console.log("Recipe generation successful:", data);
       setRecipe(data.recipe);
       
       // Update free generations count for anonymous users
