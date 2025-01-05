@@ -14,8 +14,8 @@ import MealPlanningCalendar from "@/pages/MealPlanningCalendar";
 function App() {
   return (
     <Router>
-      <MainLayout>
-        <Routes>
+      <Routes>
+        <Route element={<MainLayout />}>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -26,8 +26,8 @@ function App() {
           <Route path="/recipes" element={<RecipeArchive />} />
           <Route path="/meal-planning" element={<MealPlanning />} />
           <Route path="/meal-planning-calendar" element={<MealPlanningCalendar />} />
-        </Routes>
-      </MainLayout>
+        </Route>
+      </Routes>
     </Router>
   );
 }

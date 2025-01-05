@@ -8,7 +8,7 @@ import { FilterBar } from "@/components/recipe-archive/FilterBar";
 
 export function RecipeArchive() {
   return (
-    <div className="min-h-screen bg-background">
+    <>
       <MainHeader />
       <main>
         <HeroBanner />
@@ -20,6 +20,6 @@ export function RecipeArchive() {
           <CategoryGrid />
         </div>
       </main>
-    </div>
+    </>
   );
 }
