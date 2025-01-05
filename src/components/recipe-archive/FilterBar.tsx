@@ -23,12 +23,63 @@ export function FilterBar() {
 
       <Select>
         <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Dietary Requirements" />
+          <SelectValue placeholder="Dietary Options" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="gluten-free">Gluten-free</SelectItem>
-          <SelectItem value="low-carb">Low-carb</SelectItem>
+          <SelectItem value="classic">Classic</SelectItem>
+          <SelectItem value="low-carb">Low Carb</SelectItem>
+          <SelectItem value="keto">Keto</SelectItem>
+          <SelectItem value="paleo">Paleo</SelectItem>
           <SelectItem value="vegetarian">Vegetarian</SelectItem>
+          <SelectItem value="vegan">Vegan</SelectItem>
+          <SelectItem value="pescatarian">Pescatarian</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Allergies" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="shellfish">Shellfish</SelectItem>
+          <SelectItem value="fish">Fish</SelectItem>
+          <SelectItem value="gluten">Gluten</SelectItem>
+          <SelectItem value="dairy">Dairy</SelectItem>
+          <SelectItem value="peanut">Peanut</SelectItem>
+          <SelectItem value="soy">Soy</SelectItem>
+          <SelectItem value="egg">Egg</SelectItem>
+          <SelectItem value="mustard">Mustard</SelectItem>
+          <SelectItem value="sesame">Sesame</SelectItem>
+          <SelectItem value="nightshade">Nightshade</SelectItem>
+          <SelectItem value="sulfite">Sulfite</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Dislikes" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="avocado">Avocado</SelectItem>
+          <SelectItem value="beef">Beef</SelectItem>
+          <SelectItem value="beets">Beets</SelectItem>
+          <SelectItem value="bell-peppers">Bell Peppers</SelectItem>
+          <SelectItem value="blue-cheese">Blue Cheese</SelectItem>
+          <SelectItem value="sprouts">Sprouts</SelectItem>
+          <SelectItem value="cauliflower">Cauliflower</SelectItem>
+          <SelectItem value="eggplant">Eggplant</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Medical Condition" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="type1">Diabetic Type 1</SelectItem>
+          <SelectItem value="type2">Diabetic Type 2</SelectItem>
+          <SelectItem value="prediabetic">Prediabetic</SelectItem>
+          <SelectItem value="gestational">Gestational Diabetes</SelectItem>
         </SelectContent>
       </Select>
 
