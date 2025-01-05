@@ -79,19 +79,22 @@ export default function RecipeGenerator() {
   };
 
   const generateRecipe = async () => {
+    // Prevent multiple generations
     if (loading) {
       console.log("Generation already in progress");
       return;
     }
 
+    // Check for remaining generations
     if (!user && generationsLeft <= 0) {
       toast.error("You've used all your free generations. Please sign up to continue!");
       return;
     }
 
     setLoading(true);
+    console.log("Starting recipe generation with preferences:", preferences);
+
     try {
-      console.log("Starting recipe generation with preferences:", preferences);
       const { data, error } = await supabase.functions.invoke('generate-recipe', {
         body: {
           preferences,
@@ -105,6 +108,7 @@ export default function RecipeGenerator() {
       console.log("Recipe generation successful:", data);
       setRecipe(data.recipe);
       
+      // Update free generations count for anonymous users
       if (!user) {
         const newGenerationsLeft = generationsLeft - 1;
         localStorage.setItem('freeGenerationsLeft', newGenerationsLeft.toString());
@@ -121,6 +125,8 @@ export default function RecipeGenerator() {
     } catch (error) {
       console.error("Error generating recipe:", error);
       toast.error("Failed to generate recipe. Please try again.");
+      // Reset loading state on error
+      setLoading(false);
     } finally {
       setLoading(false);
     }
