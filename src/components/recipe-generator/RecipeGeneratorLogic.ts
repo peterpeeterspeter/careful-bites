@@ -57,85 +57,63 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
       return null;
     }
 
-    const recipes: RecipeSource[] = recipesData.map(recipe => {
-      // Parse ingredients
-      let parsedIngredients: string[];
-      try {
-        parsedIngredients = Array.isArray(recipe.ingredients) 
-          ? recipe.ingredients 
-          : typeof recipe.ingredients === 'string'
-            ? JSON.parse(recipe.ingredients)
-            : [];
-      } catch (e) {
-        console.error('Error parsing ingredients:', e);
-        parsedIngredients = [];
-      }
+    // Transform and validate the data
+    const validRecipes = recipesData
+      .map(recipe => {
+        try {
+          // Ensure ingredients is an array of strings
+          const ingredients = Array.isArray(recipe.ingredients) 
+            ? recipe.ingredients 
+            : typeof recipe.ingredients === 'string'
+              ? JSON.parse(recipe.ingredients)
+              : [];
 
-      // Parse instructions
-      let parsedInstructions: string[];
-      try {
-        parsedInstructions = Array.isArray(recipe.instructions)
-          ? recipe.instructions
-          : typeof recipe.instructions === 'string'
-            ? JSON.parse(recipe.instructions)
-            : [];
-      } catch (e) {
-        console.error('Error parsing instructions:', e);
-        parsedInstructions = [];
-      }
+          // Ensure instructions is an array of strings
+          const instructions = Array.isArray(recipe.instructions)
+            ? recipe.instructions
+            : typeof recipe.instructions === 'string'
+              ? JSON.parse(recipe.instructions)
+              : [];
 
-      // Parse and validate nutritional info
-      let nutritionalInfo;
-      try {
-        nutritionalInfo = typeof recipe.nutritional_info === 'string'
-          ? JSON.parse(recipe.nutritional_info)
-          : recipe.nutritional_info;
-      } catch (e) {
-        console.error('Error parsing nutritional info:', e);
-        nutritionalInfo = { calories: 0, carbs: 0, protein: 0, fat: 0 };
-      }
+          // Validate nutritional info
+          const nutritionalInfo = typeof recipe.nutritional_info === 'string'
+            ? JSON.parse(recipe.nutritional_info)
+            : recipe.nutritional_info;
 
-      // Ensure nutritional info has all required fields with proper number types
-      const validatedNutritionalInfo = {
-        calories: Number(nutritionalInfo?.calories) || 0,
-        carbs: Number(nutritionalInfo?.carbs) || 0,
-        protein: Number(nutritionalInfo?.protein) || 0,
-        fat: Number(nutritionalInfo?.fat) || 0
-      };
+          if (!nutritionalInfo || typeof nutritionalInfo !== 'object') {
+            throw new Error('Invalid nutritional info format');
+          }
 
-      return {
-        title: recipe.title,
-        description: recipe.description,
-        ingredients: parsedIngredients,
-        instructions: parsedInstructions,
-        nutritional_info: validatedNutritionalInfo,
-        glycemic_index: recipe.glycemic_index,
-        glycemic_load: recipe.glycemic_load,
-        cuisine_type: recipe.cuisine_type
-      };
-    });
+          return {
+            title: recipe.title,
+            description: recipe.description,
+            ingredients: ingredients,
+            instructions: instructions,
+            nutritional_info: {
+              calories: Number(nutritionalInfo.calories) || 0,
+              carbs: Number(nutritionalInfo.carbs) || 0,
+              protein: Number(nutritionalInfo.protein) || 0,
+              fat: Number(nutritionalInfo.fat) || 0
+            },
+            glycemic_index: recipe.glycemic_index,
+            glycemic_load: recipe.glycemic_load,
+            cuisine_type: recipe.cuisine_type
+          } as RecipeSource;
+        } catch (e) {
+          console.error('Error processing recipe:', e);
+          return null;
+        }
+      })
+      .filter((recipe): recipe is RecipeSource => recipe !== null);
 
-    // Filter out recipes with allergens if specified
-    let filteredRecipes = recipes;
-    if (preferences.allergies) {
-      filteredRecipes = recipes.filter(recipe => {
-        return !recipe.ingredients.some(ingredient => 
-          ingredient.toLowerCase().includes(preferences.allergies.toLowerCase())
-        );
-      });
-    }
-
-    if (filteredRecipes.length === 0) {
-      console.log('No recipes found after allergy filtering');
-      toast.error('No safe recipes found considering your allergies. Try different preferences.');
+    if (validRecipes.length === 0) {
+      toast.error('No valid recipes found. Please try again.');
       return null;
     }
 
-    // Select a random recipe from the filtered results
-    const randomIndex = Math.floor(Math.random() * filteredRecipes.length);
-    const selectedRecipe = filteredRecipes[randomIndex];
-
-    console.log('Selected recipe:', selectedRecipe);
+    // Select a random recipe from valid ones
+    const randomIndex = Math.floor(Math.random() * validRecipes.length);
+    const selectedRecipe = validRecipes[randomIndex];
 
     return {
       title: selectedRecipe.title,
