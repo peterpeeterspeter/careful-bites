@@ -19,6 +19,7 @@ export default function RecipeGenerator() {
   });
 
   useEffect(() => {
+    // Load stored generations count
     const storedGenerations = localStorage.getItem('freeGenerationsLeft');
     if (storedGenerations === null) {
       localStorage.setItem('freeGenerationsLeft', '3');
@@ -26,38 +27,48 @@ export default function RecipeGenerator() {
       setGenerationsLeft(parseInt(storedGenerations));
     }
 
-    // Fetch user preferences if authenticated
+    // Only fetch preferences if user is authenticated
     if (user) {
       fetchUserPreferences();
     }
+
+    // Cleanup function to prevent memory leaks
+    return () => {
+      setLoading(false);
+      setRecipe(null);
+    };
   }, [user]);
 
   const fetchUserPreferences = async () => {
     try {
-      // Fetch profile data
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("diabetes_type, dietary_restrictions")
         .eq("id", user.id)
         .single();
 
-      // Fetch dietary preferences
-      const { data: dietaryPreferences } = await supabase
+      if (profileError) throw profileError;
+
+      const { data: dietaryPreferences, error: dietaryError } = await supabase
         .from("dietary_preferences")
         .select("restriction")
         .eq("profile_id", user.id);
 
-      // Fetch food intolerances
-      const { data: foodIntolerances } = await supabase
+      if (dietaryError) throw dietaryError;
+
+      const { data: foodIntolerances, error: intolerancesError } = await supabase
         .from("food_intolerances")
-        .select("intolerance, severity")
+        .select("intolerance")
         .eq("profile_id", user.id);
 
-      // Fetch diet styles
-      const { data: dietStyles } = await supabase
+      if (intolerancesError) throw intolerancesError;
+
+      const { data: dietStyles, error: dietStylesError } = await supabase
         .from("user_diet_styles")
         .select("diet_style")
         .eq("profile_id", user.id);
+
+      if (dietStylesError) throw dietStylesError;
 
       setPreferences({
         diabetesType: profile?.diabetes_type || "type2",
@@ -75,39 +86,9 @@ export default function RecipeGenerator() {
   };
 
   const generateRecipe = async () => {
-    if (user) {
-      await generateAuthenticatedRecipe();
-    } else {
-      await generateAnonymousRecipe();
-    }
-  };
+    if (loading) return; // Prevent multiple simultaneous generations
 
-  const generateAuthenticatedRecipe = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-recipe', {
-        body: {
-          preferences,
-          profile_id: user.id,
-          isAnonymous: false
-        },
-      });
-
-      if (error) throw error;
-      setRecipe(data.recipe);
-      toast.success("Recipe generated successfully!");
-    } catch (error) {
-      console.error("Error generating recipe:", error);
-      toast.error("Failed to generate recipe");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const generateAnonymousRecipe = async () => {
-    const remainingGenerations = parseInt(localStorage.getItem('freeGenerationsLeft') || '0');
-    
-    if (remainingGenerations <= 0) {
+    if (!user && generationsLeft <= 0) {
       toast.error("You've used all your free generations. Please sign up to continue!");
       return;
     }
@@ -117,25 +98,32 @@ export default function RecipeGenerator() {
       const { data, error } = await supabase.functions.invoke('generate-recipe', {
         body: {
           preferences,
-          isAnonymous: true
+          profile_id: user?.id,
+          isAnonymous: !user
         },
       });
 
       if (error) throw error;
-      
+
       setRecipe(data.recipe);
-      const newGenerationsLeft = remainingGenerations - 1;
-      localStorage.setItem('freeGenerationsLeft', newGenerationsLeft.toString());
-      setGenerationsLeft(newGenerationsLeft);
       
-      if (newGenerationsLeft === 0) {
-        toast.info("That was your last free recipe! Sign up to generate more personalized recipes.");
+      // Update free generations count for anonymous users
+      if (!user) {
+        const newGenerationsLeft = generationsLeft - 1;
+        localStorage.setItem('freeGenerationsLeft', newGenerationsLeft.toString());
+        setGenerationsLeft(newGenerationsLeft);
+        
+        if (newGenerationsLeft === 0) {
+          toast.info("That was your last free recipe! Sign up to generate more personalized recipes.");
+        } else {
+          toast.success(`Recipe generated successfully! ${newGenerationsLeft} free generations left.`);
+        }
       } else {
-        toast.success(`Recipe generated successfully! ${newGenerationsLeft} free generations left.`);
+        toast.success("Recipe generated successfully!");
       }
     } catch (error) {
       console.error("Error generating recipe:", error);
-      toast.error("Failed to generate recipe");
+      toast.error("Failed to generate recipe. Please try again.");
     } finally {
       setLoading(false);
     }
