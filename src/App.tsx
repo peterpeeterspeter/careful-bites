@@ -6,8 +6,8 @@ import Register from "@/pages/Register";
 import Profile from "@/pages/Profile";
 import ProfileSetup from "@/pages/ProfileSetup";
 import RecipeGenerator from "@/pages/RecipeGenerator";
-import RecipeDetail from "@/pages/RecipeDetail";
-import RecipeArchive from "@/pages/RecipeArchive";
+import { RecipeDetail } from "@/pages/RecipeDetail";
+import { RecipeArchive } from "@/pages/RecipeArchive";
 import MealPlanning from "@/pages/MealPlanning";
 import MealPlanningCalendar from "@/pages/MealPlanningCalendar";
 
