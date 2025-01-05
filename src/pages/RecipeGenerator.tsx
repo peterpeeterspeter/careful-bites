@@ -12,6 +12,7 @@ export default function RecipeGenerator() {
   const [loading, setLoading] = useState(false);
   const [recipe, setRecipe] = useState(null);
   const [generationsLeft, setGenerationsLeft] = useState(3);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [preferences, setPreferences] = useState<RecipePreferences>({
     dietaryOption: "classic",
     allergies: "",
@@ -80,7 +81,7 @@ export default function RecipeGenerator() {
 
   const generateRecipe = async () => {
     // Prevent multiple simultaneous generations
-    if (loading) {
+    if (loading || isGenerating) {
       console.log("Generation already in progress");
       return;
     }
@@ -91,6 +92,7 @@ export default function RecipeGenerator() {
     }
 
     setLoading(true);
+    setIsGenerating(true);
 
     try {
       const generatedRecipe = await generateRecipeFromDatabase(preferences);
@@ -120,6 +122,7 @@ export default function RecipeGenerator() {
       toast.error("Failed to generate recipe. Please try again.");
     } finally {
       setLoading(false);
+      setIsGenerating(false);
     }
   };
 
