@@ -20,8 +20,8 @@ export function SignUpPrompt() {
 
     if (isLoading) return;
 
-    const toastId = 'checkout-process';
     setIsLoading(true);
+    const toastId = 'checkout-process';
 
     try {
       toast.loading('Preparing checkout...', { id: toastId });
@@ -34,6 +34,7 @@ export function SignUpPrompt() {
       if (!data?.url) throw new Error('No checkout URL received');
 
       toast.dismiss(toastId);
+      
       // Use window.location.href for navigation to external URLs
       window.location.href = data.url;
     } catch (error) {
@@ -42,6 +43,13 @@ export function SignUpPrompt() {
       setIsLoading(false);
     }
   };
+
+  // Add cleanup on unmount
+  useEffect(() => {
+    return () => {
+      setIsLoading(false); // Reset loading state when component unmounts
+    };
+  }, []);
 
   return (
     <Card className="bg-green-50 border-green-200">
@@ -53,7 +61,7 @@ export function SignUpPrompt() {
         <Button
           onClick={handleSubscribe}
           disabled={isLoading}
-          className="bg-[#4CAF50] hover:bg-[#45a049]"
+          className="bg-[#4CAF50] hover:bg-[#45a049] disabled:bg-[#45a049]/50"
         >
           {isLoading ? (
             <>
