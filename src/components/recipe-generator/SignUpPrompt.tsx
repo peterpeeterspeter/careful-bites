@@ -35,7 +35,6 @@ export function SignUpPrompt() {
 
       toast.dismiss(toastId);
       
-      // Use window.location.href for navigation to external URLs
       window.location.href = data.url;
     } catch (error) {
       console.error('Error creating checkout session:', error);
@@ -44,10 +43,9 @@ export function SignUpPrompt() {
     }
   };
 
-  // Add cleanup on unmount
   useEffect(() => {
     return () => {
-      setIsLoading(false); // Reset loading state when component unmounts
+      setIsLoading(false);
     };
   }, []);
 
