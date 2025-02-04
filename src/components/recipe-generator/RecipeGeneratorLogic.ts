@@ -28,13 +28,22 @@ export const generateRecipeFromDatabase = async (preferences: RecipePreferences)
   console.log('Generating recipe with preferences:', preferences);
 
   try {
-    const { data: recipesData, error } = await supabase
+    let query = supabase
       .from('recipe_sources')
       .select('*')
-      .eq('diabetes_friendly', true)
-      .eq(preferences.cuisine ? 'cuisine_type' : '', preferences.cuisine?.toLowerCase() || '')
-      .contains(preferences.dietaryOption && preferences.dietaryOption !== 'classic' ? 'tags' : '', 
-                preferences.dietaryOption ? [preferences.dietaryOption.toLowerCase()] : []);
+      .eq('diabetes_friendly', true);
+
+    // Add cuisine filter if specified
+    if (preferences.cuisine) {
+      query = query.eq('cuisine_type', preferences.cuisine.toLowerCase());
+    }
+
+    // Add dietary preference filter if not classic
+    if (preferences.dietaryOption && preferences.dietaryOption !== 'classic') {
+      query = query.contains('tags', [preferences.dietaryOption.toLowerCase()]);
+    }
+
+    const { data: recipesData, error } = await query;
 
     if (error) {
       console.error('Error fetching recipes:', error);
