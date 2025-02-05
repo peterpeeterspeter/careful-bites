@@ -26,8 +26,17 @@ export function SignUpPrompt() {
     try {
       toast.loading('Preparing checkout...', { id: toastId });
 
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        throw new Error('No access token available');
+      }
+
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
       });
 
       if (error) throw error;
@@ -39,15 +48,10 @@ export function SignUpPrompt() {
     } catch (error) {
       console.error('Error creating checkout session:', error);
       toast.error('Failed to start checkout process. Please try again.', { id: toastId });
+    } finally {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    return () => {
-      setIsLoading(false);
-    };
-  }, []);
 
   return (
     <Card className="bg-green-50 border-green-200">
